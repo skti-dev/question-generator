@@ -25,85 +25,88 @@ def main():
   st.title("📚 Gerador de Questões BNCC - 4º Ano")
   st.markdown("Gerador inteligente de questões baseado nos códigos de habilidade da BNCC")
   
-  # Sidebar para configurações
-  with st.sidebar:
-    st.header("⚙️ Configurações")
+  # Configurações centralizadas
+  st.header("⚙️ Configurações")
+  
+  # Seleção de matéria
+  subjects = get_subjects()
+  if not subjects:
+    st.error("❌ Dados da BNCC não encontrados! Verifique se o arquivo BNCC_4ano_Mapeamento.json existe.")
+    return
+  
+  selected_subject = st.selectbox(
+    "📖 Selecione a Matéria:",
+    subjects,
+    key="subject_select"
+  )
+  
+  # Códigos disponíveis para a matéria selecionada
+  if selected_subject:
+    codes_data = get_codes_for_subject(selected_subject)
     
-    # Seleção de matéria
-    subjects = get_subjects()
-    if not subjects:
-      st.error("❌ Dados da BNCC não encontrados! Verifique se o arquivo BNCC_4ano_Mapeamento.json existe.")
-      return
-    
-    selected_subject = st.selectbox(
-      "📖 Selecione a Matéria:",
-      subjects,
-      key="subject_select"
-    )
-    
-    # Códigos disponíveis para a matéria selecionada
-    if selected_subject:
-      codes_data = get_codes_for_subject(selected_subject)
+    if codes_data:
+      st.subheader(f"📋 Códigos - {selected_subject}")
       
-      if codes_data:
-        st.subheader(f"📋 Códigos - {selected_subject}")
-        
-        # Opção de selecionar todos
-        select_all = st.checkbox("Selecionar todos os códigos")
-        
-        if select_all:
-          selected_codes = [code["codigo"] for code in codes_data]
-        else:
-          # Seleção individual de códigos
-          selected_codes = st.multiselect(
-            "Códigos de Habilidade:",
-            options=[code["codigo"] for code in codes_data],
-            format_func=lambda x: f"{x} - {next(c['objeto_conhecimento'][:50] + '...' if len(c['objeto_conhecimento']) > 50 else c['objeto_conhecimento'] for c in codes_data if c['codigo'] == x)}",
-            key="codes_select"
-          )
-        
-        # Configurações de dificuldade
-        st.subheader("🎯 Distribuição de Dificuldade")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-          easy_count = st.number_input("Fácil", min_value=0, max_value=10, value=1)
-        with col2:
-          medium_count = st.number_input("Médio", min_value=0, max_value=10, value=1)
-        with col3:
-          hard_count = st.number_input("Difícil", min_value=0, max_value=10, value=1)
-        
-        # Proporção de tipos de questão
-        st.subheader("📝 Tipos de Questão")
-        multiple_choice_ratio = st.slider(
-          "% Múltipla Escolha",
-          min_value=0.0,
-          max_value=1.0,
-          value=0.7,
-          step=0.1,
-          help="Restante será Verdadeiro/Falso"
+      # Opção de selecionar todos
+      select_all = st.checkbox("Selecionar todos os códigos")
+      
+      if select_all:
+        selected_codes = [code["codigo"] for code in codes_data]
+      else:
+        # Seleção individual de códigos
+        selected_codes = st.multiselect(
+          "Códigos de Habilidade:",
+          options=[code["codigo"] for code in codes_data],
+          format_func=lambda x: f"{x} - {next(c['objeto_conhecimento'][:50] + '...' if len(c['objeto_conhecimento']) > 50 else c['objeto_conhecimento'] for c in codes_data if c['codigo'] == x)}",
+          key="codes_select"
         )
+      
+      # Configurações de dificuldade
+      st.subheader("🎯 Distribuição de Dificuldade")
+      
+      col1, col2, col3 = st.columns(3)
+      with col1:
+        easy_count = st.number_input("Fácil", min_value=0, max_value=10, value=1)
+      with col2:
+        medium_count = st.number_input("Médio", min_value=0, max_value=10, value=1)
+      with col3:
+        hard_count = st.number_input("Difícil", min_value=0, max_value=10, value=1)
+      
+      # Proporção de tipos de questão
+      st.subheader("📝 Tipos de Questão")
+      multiple_choice_ratio = st.slider(
+        "% Múltipla Escolha",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.7,
+        step=0.1,
+        help="Restante será Verdadeiro/Falso"
+      )
+      
+      # Configurações avançadas
+      with st.expander("🔧 Configurações Avançadas"):
+        use_cache = st.checkbox("Usar cache", value=True, help="Reutilizar questões já geradas")
         
-        # Configurações avançadas
-        with st.expander("🔧 Configurações Avançadas"):
-          use_cache = st.checkbox("Usar cache", value=True, help="Reutilizar questões já geradas")
-          
-          if st.button("🗑️ Limpar Cache"):
-            try:
-              deleted = pipeline.cache_manager.clear_cache(older_than_days=0)
-              st.success(f"✅ {deleted} entradas removidas do cache")
-            except Exception as e:
-              st.error(f"❌ Erro ao limpar cache: {e}")
-        
-        # Botão de geração
-        total_questions = len(selected_codes) * (easy_count + medium_count + hard_count)
-        
-        if st.button(
-          f"🚀 Gerar {total_questions} Questões",
-          disabled=len(selected_codes) == 0 or total_questions == 0,
-          type="primary"
-        ):
-          generate_questions_ui(selected_codes, easy_count, medium_count, hard_count, multiple_choice_ratio, use_cache)
+        if st.button("🗑️ Limpar Cache"):
+          try:
+            deleted = pipeline.cache_manager.clear_cache(older_than_days=0)
+            st.success(f"✅ {deleted} entradas removidas do cache")
+          except Exception as e:
+            st.error(f"❌ Erro ao limpar cache: {e}")
+      
+      # Botão de geração
+      total_questions = len(selected_codes) * (easy_count + medium_count + hard_count)
+      
+      if st.button(
+        f"🚀 Gerar {total_questions} Questões",
+        disabled=len(selected_codes) == 0 or total_questions == 0,
+        type="primary"
+      ):
+        generate_questions_ui(selected_codes, easy_count, medium_count, hard_count, multiple_choice_ratio, use_cache)
+  
+  # Mostrar resultados se existirem no session state
+  if 'current_batches' in st.session_state and st.session_state.current_batches:
+    display_results(st.session_state.current_batches)
 
 def generate_questions_ui(codes, easy_count, medium_count, hard_count, multiple_choice_ratio, use_cache):
   """Interface para geração de questões"""
@@ -130,10 +133,8 @@ def generate_questions_ui(codes, easy_count, medium_count, hard_count, multiple_
       status_text.text("✅ Questões geradas com sucesso!")
       
       # Salvar no session state
-      st.session_state.generated_batches = batches
-      
-      # Mostrar resultados
-      display_results(batches)
+      st.session_state.current_batches = batches
+      st.rerun()  # Rerun para mostrar os resultados na main
       
     except Exception as e:
       st.error(f"❌ Erro na geração: {str(e)}")
@@ -141,6 +142,9 @@ def generate_questions_ui(codes, easy_count, medium_count, hard_count, multiple_
 
 def display_results(batches):
   """Exibe os resultados das questões geradas"""
+  
+  # Salvar batches no session state para persistir entre reruns
+  st.session_state.current_batches = batches
   
   st.header("📊 Resultados")
   
@@ -189,43 +193,47 @@ def display_results(batches):
       else:
         st.warning("⚠️ Nenhuma questão foi aprovada na validação para este código.")
   
-  # Botão de exportação
-  if st.button("💾 Exportar para JSON"):
+  # Sistema de exportação simplificado
+  st.markdown("---")
+  col1, col2, col3 = st.columns([1, 2, 1])
+  
+  with col2:
+    # Preparar dados JSON
     try:
       output_path = pipeline.export_to_json(batches, "questoes_exportadas.json")
-      st.success(f"✅ Questões exportadas para: {output_path}")
-      
-      # Download
       with open(output_path, 'r', encoding='utf-8') as f:
         json_data = f.read()
       
+      # Botão de download direto
       st.download_button(
-        label="⬇️ Download JSON",
+        label="💾 Exportar e Baixar JSON",
         data=json_data,
         file_name="questoes_bncc_4ano.json",
-        mime="application/json"
+        mime="application/json",
+        type="primary",
+        use_container_width=True
       )
       
     except Exception as e:
-      st.error(f"❌ Erro na exportação: {e}")
+      st.error(f"❌ Erro na preparação da exportação: {e}")
 
 # Função para mostrar informações do sistema
 def show_system_info():
   """Mostra informações do sistema na sidebar"""
   with st.sidebar:
-    with st.expander("ℹ️ Informações do Sistema"):
-      try:
-        cache_stats = pipeline.get_cache_stats()
-        st.write(f"**Cache:** {cache_stats['total_entries']} entradas")
-        
-        subjects = get_subjects()
-        st.write(f"**Matérias:** {len(subjects)}")
-        
-        total_codes = sum(len(get_codes_for_subject(subject)) for subject in subjects)
-        st.write(f"**Códigos BNCC:** {total_codes}")
-        
-      except Exception as e:
-        st.write(f"Erro ao carregar stats: {e}")
+    st.header("ℹ️ Informações do Sistema")
+    try:
+      cache_stats = pipeline.get_cache_stats()
+      st.write(f"**Cache:** {cache_stats['total_entries']} entradas")
+      
+      subjects = get_subjects()
+      st.write(f"**Matérias:** {len(subjects)}")
+      
+      total_codes = sum(len(get_codes_for_subject(subject)) for subject in subjects)
+      st.write(f"**Códigos BNCC:** {total_codes}")
+      
+    except Exception as e:
+      st.write(f"Erro ao carregar stats: {e}")
 
 if __name__ == "__main__":
   show_system_info()
