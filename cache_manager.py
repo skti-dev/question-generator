@@ -154,3 +154,34 @@ class CacheManager:
       "total_entries": total_entries,
       "top_cached_patterns": [{"pattern": row[1], "count": row[0]} for row in top_keys]
     }
+  
+  def get_all_cache_entries(self) -> List[CacheEntry]:
+    """Retorna todas as entradas do cache"""
+    with sqlite3.connect(self.db_path) as conn:
+      cursor = conn.execute("""
+        SELECT cache_key, question_data, validation_data, created_at 
+        FROM question_cache 
+        ORDER BY created_at DESC
+      """)
+      
+      entries = []
+      for row in cursor.fetchall():
+        try:
+          question_data = json.loads(row[1])
+          validation_data = json.loads(row[2])
+          
+          question = Question(**question_data)
+          validation = ValidationResult(**validation_data)
+          
+          entry = CacheEntry(
+            cache_key=row[0],
+            question=question,
+            validation=validation,
+            created_at=row[3]
+          )
+          entries.append(entry)
+        except Exception as e:
+          # Se houver erro ao deserializar, ignora entrada
+          continue
+      
+      return entries

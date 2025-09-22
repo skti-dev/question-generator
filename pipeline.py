@@ -88,7 +88,7 @@ class QuestionGeneratorPipeline:
   def generate_single_question(self, request: QuestionRequest, use_cache: bool = True) -> QuestionWithValidation:
     """Gera uma única questão com validação"""
     
-    # Verificar cache primeiro
+    # Verificar cache primeiro se habilitado
     if use_cache:
       cached_questions = self.cache_manager.get_cached_questions(request, limit=5)
       if cached_questions:
@@ -105,14 +105,14 @@ class QuestionGeneratorPipeline:
         # Gerar questão usando a chain apropriada
         question = self._route_to_subject_chain(request)
         
-        # Verificar se é duplicata
+        # Verificar se é duplicata apenas se usar cache
         if use_cache and self.cache_manager.is_duplicate(request, question):
           continue  # Tentar novamente
         
         # Validar questão
         validation = validate_question(question, request)
         
-        # Salvar no cache se válida
+        # Salvar no cache apenas se válida e usar cache
         if use_cache and validation.is_aligned:
           self.cache_manager.cache_question(request, question, validation)
         
@@ -144,6 +144,61 @@ class QuestionGeneratorPipeline:
           return QuestionWithValidation(question=question, validation=validation)
         
         continue
+  
+  def regenerate_question_with_variety(self, request: QuestionRequest, avoid_text: str = None) -> QuestionWithValidation:
+    """Gera uma nova questão garantindo variedade e evitando texto específico"""
+    
+    max_attempts = 8  # Mais tentativas para regeneração
+    best_question = None
+    best_score = 0.0
+    
+    for attempt in range(max_attempts):
+      try:
+        # Gerar questão SEM usar cache
+        question = self._route_to_subject_chain(request)
+        
+        # Se deve evitar texto específico, verificar diferença
+        if avoid_text and avoid_text.strip():
+          if question.enunciado.strip() == avoid_text.strip():
+            continue  # Pular questões idênticas
+        
+        # Validar questão
+        validation = validate_question(question, request)
+        
+        # Manter a melhor questão encontrada
+        if validation.confidence_score > best_score:
+          best_question = QuestionWithValidation(question=question, validation=validation)
+          best_score = validation.confidence_score
+          
+          # Se encontrou uma boa questão, usar ela
+          if validation.is_aligned and validation.confidence_score >= 0.7:
+            break
+            
+      except Exception as e:
+        continue  # Tentar próxima iteração
+    
+    # Retornar a melhor questão encontrada ou criar uma de erro
+    if best_question:
+      return best_question
+    else:
+      # Criar questão de erro como fallback
+      validation = ValidationResult(
+        is_aligned=False,
+        confidence_score=0.0,
+        feedback="Não foi possível gerar uma questão válida após várias tentativas",
+        suggestions="Tentar novamente com parâmetros diferentes"
+      )
+      
+      question = Question(
+        codigo=request.codigo,
+        enunciado="Erro na regeneração da questão",
+        opcoes=None,
+        gabarito="N/A",
+        difficulty=request.difficulty,
+        question_type=request.question_type
+      )
+      
+      return QuestionWithValidation(question=question, validation=validation)
   
   def generate_questions_batch(
     self, 
@@ -225,24 +280,33 @@ class QuestionGeneratorPipeline:
       mc_count = int(total_per_code * multiple_choice_ratio)
       tf_count = total_per_code - mc_count
       
-      # Distribuir tipos por dificuldade (simplificado)
-      difficulties = []
-      question_types = []
-      
-      # Adicionar questões de cada dificuldade
+      # Criar listas de dificuldades na ordem desejada
+      difficulties_ordered = []
       for _ in range(easy_count):
-        difficulties.append(DifficultyLevel.EASY)
+        difficulties_ordered.append(DifficultyLevel.EASY)
       for _ in range(medium_count):
-        difficulties.append(DifficultyLevel.MEDIUM)
+        difficulties_ordered.append(DifficultyLevel.MEDIUM)
       for _ in range(hard_count):
-        difficulties.append(DifficultyLevel.HARD)
+        difficulties_ordered.append(DifficultyLevel.HARD)
       
-      # Distribuir tipos
-      for i in range(total_per_code):
-        if i < mc_count:
-          question_types.append(QuestionType.MULTIPLE_CHOICE)
-        else:
-          question_types.append(QuestionType.TRUE_FALSE)
+      # Embaralhar para distribuição aleatória
+      import random
+      random.shuffle(difficulties_ordered)
+      
+      # Criar lista de tipos: primeiro múltipla escolha, depois verdadeiro/falso
+      question_types_ordered = []
+      for _ in range(mc_count):
+        question_types_ordered.append(QuestionType.MULTIPLE_CHOICE)
+      for _ in range(tf_count):
+        question_types_ordered.append(QuestionType.TRUE_FALSE)
+      
+      # Embaralhar os tipos também
+      random.shuffle(question_types_ordered)
+      
+      # Combinar dificuldades e tipos
+      difficulties = difficulties_ordered
+      question_types = question_types_ordered
+      
       
       # Gerar batch para este código
       batch = self.generate_questions_batch(
