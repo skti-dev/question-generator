@@ -2,6 +2,20 @@
 
 Sistema inteligente para geração automática de questões educacionais baseadas nos códigos de habilidade da BNCC (Base Nacional Comum Curricular) para o 4º ano do ensino fundamental.
 
+<img width="1849" height="582" alt="image" src="https://github.com/user-attachments/assets/8589cfc9-66a7-4e37-bd96-cedf6c6727b2" />
+<img width="1740" height="867" alt="image" src="https://github.com/user-attachments/assets/664caa4b-1e7b-4d2b-96ff-9c7af126baa2" />
+<img width="420" height="232" alt="image" src="https://github.com/user-attachments/assets/04d847e9-7b00-4967-9ac5-6e699780a157" />
+<img width="1340" height="559" alt="image" src="https://github.com/user-attachments/assets/e621c2d7-c275-4ab1-b000-d010f8662745" />
+<img width="324" height="49" alt="image" src="https://github.com/user-attachments/assets/f9eb9ccb-65ba-459d-822d-3b72d98449ab" />
+<img width="449" height="91" alt="image" src="https://github.com/user-attachments/assets/e3ddf017-6cf3-4d47-b551-c75797b1ac13" />
+<img width="1575" height="835" alt="image" src="https://github.com/user-attachments/assets/cb6535f1-d75f-40b9-b2cb-62a0a8761d5c" />
+<img width="1565" height="700" alt="image" src="https://github.com/user-attachments/assets/f4780910-88a4-4c82-90e4-bdd3480d1490" />
+<img width="1365" height="765" alt="image" src="https://github.com/user-attachments/assets/076b1e93-0f87-4580-83c8-ca7e53646d4d" />
+<img width="417" height="193" alt="image" src="https://github.com/user-attachments/assets/8e1d3c11-de34-4bc2-8108-45c197ec89a8" />
+<img width="988" height="90" alt="image" src="https://github.com/user-attachments/assets/fefdc7b8-63f1-4ef3-b154-0a7ff6d02249" />
+<img width="343" height="80" alt="image" src="https://github.com/user-attachments/assets/543f3c9d-0fbc-4cbf-9179-bb8dfc9dc0c9" />
+<img width="776" height="563" alt="image" src="https://github.com/user-attachments/assets/ef81d54f-0258-4e07-8de6-52b42babf78a" />
+
 ## 🎯 Objetivo do Projeto
 
 Este projeto foi desenvolvido para automatizar a criação de questões educacionais alinhadas à BNCC, proporcionando:
@@ -85,7 +99,7 @@ question_generator/
 - **🔄 Git** - Controle de versão
 - **🐳 Virtual Environment** - Isolamento de dependências
 
-## 🀽� Como Usar
+## Como Usar
 
 ### 1. Pré-requisitos
 
@@ -126,7 +140,7 @@ Crie um arquivo `.env` na raiz do projeto:
 OPENAI_API_KEY=sua_chave_openai_aqui
 
 # Senha de acesso ao sistema
-APP_PASSWORD=soagipode
+APP_PASSWORD=sua_senha_aqui
 
 # Configurações LangSmith (opcional - para debug)
 LANGSMITH_TRACING=true
