@@ -1,0 +1,12 @@
+langchain
+langchain-openai
+langchain_community
+pillow
+streamlit
+dotenv
+pydantic
+beautifulsoup4
+python-slugify
+sqlalchemy
+pandas
+openpyxl

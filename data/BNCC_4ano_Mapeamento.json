@@ -1,0 +1,308 @@
+{
+  "Matemática": [
+    {
+      "codigo": "EF04MA01",
+      "objeto_conhecimento": "Comparação e ordenação de números naturais de até cinco ordens",
+      "unidade_tematica": "Números / Sistema de numeração decimal"
+    },
+    {
+      "codigo": "EF04MA02",
+      "objeto_conhecimento": "Composição e decomposição de um número natural de até cinco ordens, por meio de adições e multiplicações por potências de 10",
+      "unidade_tematica": "Números / Sistema de numeração decimal"
+    },
+    {
+      "codigo": "EF04MA03",
+      "objeto_conhecimento": "Desenvolvimento de diferentes estratégias de cálculo com números naturais",
+      "unidade_tematica": "Números / Propriedades das operações"
+    },
+    {
+      "codigo": "EF04MA04",
+      "objeto_conhecimento": "Resolver e elaborar problemas com números naturais (adição, subtração, multiplicação e divisão)",
+      "unidade_tematica": "Números / Propriedades das operações"
+    },
+    {
+      "codigo": "EF04MA05",
+      "objeto_conhecimento": "Utilizar as relações entre adição e subtração e entre multiplicação e divisão",
+      "unidade_tematica": "Números / Propriedades das operações"
+    },
+    {
+      "codigo": "EF04MA06",
+      "objeto_conhecimento": "Problemas envolvendo diferentes significados da multiplicação e da divisão",
+      "unidade_tematica": "Números / Operações"
+    },
+    {
+      "codigo": "EF04MA07",
+      "objeto_conhecimento": "Resolver e elaborar problemas envolvendo diferentes significados da divisão",
+      "unidade_tematica": "Números / Operações"
+    },
+    {
+      "codigo": "EF04MA08",
+      "objeto_conhecimento": "Resolver problemas simples com uso de material manipulável (contagem, adição e multiplicação)",
+      "unidade_tematica": "Números / Operações"
+    },
+    {
+      "codigo": "EF04MA09",
+      "objeto_conhecimento": "Resolver problemas diversos com números naturais (situações aditivas e multiplicativas)",
+      "unidade_tematica": "Números / Operações"
+    },
+    {
+      "codigo": "EF04MA10",
+      "objeto_conhecimento": "Frações unitárias mais usuais",
+      "unidade_tematica": "Números racionais"
+    },
+    {
+      "codigo": "EF04MA11",
+      "objeto_conhecimento": "Reconhecer e representar frações em situações concretas",
+      "unidade_tematica": "Números racionais"
+    },
+    {
+      "codigo": "EF04MA12",
+      "objeto_conhecimento": "Representação decimal para décimos e centésimos",
+      "unidade_tematica": "Números racionais"
+    },
+    {
+      "codigo": "EF04MA13",
+      "objeto_conhecimento": "Utilizar frações e decimais em contextos práticos",
+      "unidade_tematica": "Números racionais"
+    },
+    {
+      "codigo": "EF04MA14",
+      "objeto_conhecimento": "Sequência numérica recursiva formada por múltiplos",
+      "unidade_tematica": "Álgebra"
+    },
+    {
+      "codigo": "EF04MA15",
+      "objeto_conhecimento": "Sequência numérica recursiva formada por números naturais",
+      "unidade_tematica": "Álgebra"
+    },
+    {
+      "codigo": "EF04MA16",
+      "objeto_conhecimento": "Resolver expressões numéricas com as quatro operações",
+      "unidade_tematica": "Álgebra / Relações entre operações"
+    },
+    {
+      "codigo": "EF04MA17",
+      "objeto_conhecimento": "Localização e movimentação: pontos de referência",
+      "unidade_tematica": "Geometria"
+    },
+    {
+      "codigo": "EF04MA18",
+      "objeto_conhecimento": "Figuras geométricas espaciais (prismas e pirâmides)",
+      "unidade_tematica": "Geometria"
+    },
+    {
+      "codigo": "EF04MA19",
+      "objeto_conhecimento": "Ângulos (dobraduras e uso experimental)",
+      "unidade_tematica": "Geometria"
+    },
+    {
+      "codigo": "EF04MA20",
+      "objeto_conhecimento": "Áreas de figuras construídas em malhas quadriculadas",
+      "unidade_tematica": "Geometria"
+    },
+    {
+      "codigo": "EF04MA21",
+      "objeto_conhecimento": "Medidas de tempo: leitura de horas em relógios digitais e analógicos",
+      "unidade_tematica": "Grandezas e medidas"
+    },
+    {
+      "codigo": "EF04MA22",
+      "objeto_conhecimento": "Resolver problemas envolvendo unidades de tempo",
+      "unidade_tematica": "Grandezas e medidas"
+    },
+    {
+      "codigo": "EF04MA23",
+      "objeto_conhecimento": "Medidas de temperatura em grau Celsius",
+      "unidade_tematica": "Grandezas e medidas"
+    },
+    {
+      "codigo": "EF04MA24",
+      "objeto_conhecimento": "Leitura, interpretação e representação de dados em tabelas e gráficos",
+      "unidade_tematica": "Estatística e probabilidade"
+    },
+    {
+      "codigo": "EF04MA25",
+      "objeto_conhecimento": "Resolver problemas utilizando tabelas e gráficos",
+      "unidade_tematica": "Estatística e probabilidade"
+    },
+    {
+      "codigo": "EF04MA26",
+      "objeto_conhecimento": "Coleta, classificação e representação de dados",
+      "unidade_tematica": "Estatística e probabilidade"
+    },
+    {
+      "codigo": "EF04MA27",
+      "objeto_conhecimento": "Interpretar resultados de pesquisas simples",
+      "unidade_tematica": "Estatística e probabilidade"
+    },
+    {
+      "codigo": "EF04MA28",
+      "objeto_conhecimento": "Utilizar dados em situações cotidianas",
+      "unidade_tematica": "Estatística e probabilidade"
+    }
+  ],
+  "Ciências": [
+    {
+      "codigo": "EF04CI01",
+      "objeto_conhecimento": "Transformações reversíveis e não reversíveis (misturas)",
+      "unidade_tematica": "Matéria e energia / Misturas"
+    },
+    {
+      "codigo": "EF04CI02",
+      "objeto_conhecimento": "Testar transformações nos materiais do dia a dia",
+      "unidade_tematica": "Matéria e energia / Misturas"
+    },
+    {
+      "codigo": "EF04CI03",
+      "objeto_conhecimento": "Concluir sobre mudanças reversíveis e irreversíveis por aquecimento ou resfriamento",
+      "unidade_tematica": "Matéria e energia / Misturas"
+    },
+    {
+      "codigo": "EF04CI04",
+      "objeto_conhecimento": "Microrganismos / Cadeias alimentares simples",
+      "unidade_tematica": "Vida e evolução"
+    },
+    {
+      "codigo": "EF04CI05",
+      "objeto_conhecimento": "Comparar ciclo da matéria e fluxo de energia",
+      "unidade_tematica": "Vida e evolução"
+    },
+    {
+      "codigo": "EF04CI06",
+      "objeto_conhecimento": "Participação de fungos e bactérias na decomposição",
+      "unidade_tematica": "Vida e evolução"
+    },
+    {
+      "codigo": "EF04CI07",
+      "objeto_conhecimento": "Participação de microrganismos na produção de alimentos",
+      "unidade_tematica": "Vida e evolução"
+    },
+    {
+      "codigo": "EF04CI08",
+      "objeto_conhecimento": "Reconhecer o papel de microrganismos em diferentes contextos",
+      "unidade_tematica": "Vida e evolução"
+    },
+    {
+      "codigo": "EF04CI09",
+      "objeto_conhecimento": "Calendários, fenômenos cíclicos, pontos cardeais",
+      "unidade_tematica": "Terra e Universo"
+    },
+    {
+      "codigo": "EF04CI10",
+      "objeto_conhecimento": "Observar, medir e comparar movimentos do Sol e da Lua",
+      "unidade_tematica": "Terra e Universo"
+    },
+    {
+      "codigo": "EF04CI11",
+      "objeto_conhecimento": "Relacionar movimentos da Terra com fenômenos naturais",
+      "unidade_tematica": "Terra e Universo"
+    }
+  ],
+  "Português": [
+    {
+      "codigo": "EF04LP01",
+      "objeto_conhecimento": "Ortografização / construção do sistema alfabético",
+      "unidade_tematica": "Todos os campos de atuação / Análise linguística"
+    },
+    {
+      "codigo": "EF04LP02",
+      "objeto_conhecimento": "Leitura/escrita de sílabas VV, CVV",
+      "unidade_tematica": "Todos os campos de atuação / Análise linguística"
+    },
+    {
+      "codigo": "EF04LP03",
+      "objeto_conhecimento": "Conhecimento do alfabeto / polissemia",
+      "unidade_tematica": "Todos os campos de atuação"
+    },
+    {
+      "codigo": "EF04LP04",
+      "objeto_conhecimento": "Acentuação de paroxítonas (-i(s), -l, -r, -ão(s))",
+      "unidade_tematica": "Todos os campos de atuação / Ortografia"
+    },
+    {
+      "codigo": "EF04LP05",
+      "objeto_conhecimento": "Pontuação: ponto, interrogação, exclamação, vírgula em enumerações",
+      "unidade_tematica": "Todos os campos de atuação / Convenções da escrita"
+    },
+    {
+      "codigo": "EF04LP06",
+      "objeto_conhecimento": "Concordância verbal",
+      "unidade_tematica": "Todos os campos de atuação / Morfossintaxe"
+    },
+    {
+      "codigo": "EF04LP07",
+      "objeto_conhecimento": "Concordância no grupo nominal",
+      "unidade_tematica": "Todos os campos de atuação / Morfossintaxe"
+    },
+    {
+      "codigo": "EF04LP08",
+      "objeto_conhecimento": "Uso de recursos de referenciação e coesão",
+      "unidade_tematica": "Todos os campos de atuação / Análise linguística"
+    },
+    {
+      "codigo": "EF04LP09",
+      "objeto_conhecimento": "Compreensão em leitura – gêneros do campo da vida cotidiana",
+      "unidade_tematica": "Campo da vida cotidiana"
+    },
+    {
+      "codigo": "EF04LP11",
+      "objeto_conhecimento": "Produzir cartas pessoais de reclamação etc.",
+      "unidade_tematica": "Campo da vida cotidiana"
+    },
+    {
+      "codigo": "EF04LP12",
+      "objeto_conhecimento": "Assistir a vídeos e planejar tutoriais em áudio/vídeo",
+      "unidade_tematica": "Campo da vida cotidiana"
+    },
+    {
+      "codigo": "EF04LP14",
+      "objeto_conhecimento": "Identificar fatos, participantes, local e tempo em notícias",
+      "unidade_tematica": "Campo da vida pública"
+    },
+    {
+      "codigo": "EF04LP15",
+      "objeto_conhecimento": "Distinguir fatos de opinião em textos",
+      "unidade_tematica": "Campo da vida pública"
+    },
+    {
+      "codigo": "EF04LP16",
+      "objeto_conhecimento": "Produzir notícias digitais ou impressas",
+      "unidade_tematica": "Campo da vida pública"
+    },
+    {
+      "codigo": "EF04LP17",
+      "objeto_conhecimento": "Produzir jornais radiofônicos/televisivos e entrevistas",
+      "unidade_tematica": "Campo da vida pública"
+    },
+    {
+      "codigo": "EF04LP18",
+      "objeto_conhecimento": "Analisar entonação e expressão de âncoras de jornal",
+      "unidade_tematica": "Campo da vida pública"
+    },
+    {
+      "codigo": "EF04LP23",
+      "objeto_conhecimento": "Identificar e reproduzir verbetes de enciclopédia infantil",
+      "unidade_tematica": "Campo das práticas de estudo e pesquisa"
+    },
+    {
+      "codigo": "EF04LP24",
+      "objeto_conhecimento": "Identificar e reproduzir tabelas, diagramas e gráficos",
+      "unidade_tematica": "Campo das práticas de estudo e pesquisa"
+    },
+    {
+      "codigo": "EF04LP25",
+      "objeto_conhecimento": "Representar cenas de textos dramáticos",
+      "unidade_tematica": "Campo artístico-literário"
+    },
+    {
+      "codigo": "EF04LP26",
+      "objeto_conhecimento": "Observar poemas concretos: formato/diagramação",
+      "unidade_tematica": "Campo artístico-literário"
+    },
+    {
+      "codigo": "EF04LP27",
+      "objeto_conhecimento": "Identificar marcadores das falas e de cena em textos dramáticos",
+      "unidade_tematica": "Campo artístico-literário"
+    }
+  ]
+}
