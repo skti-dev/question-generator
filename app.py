@@ -21,6 +21,43 @@ st.set_page_config(
   layout="wide"
 )
 
+def check_authentication():
+  """Verifica se o usuário está autenticado"""
+  # Obter senha do .env
+  app_password = os.getenv('APP_PASSWORD')
+  
+  if not app_password:
+    st.error("❌ Senha não configurada no sistema!")
+    st.stop()
+  
+  # Verificar se já está autenticado
+  if st.session_state.get('authenticated', False):
+    return True
+  
+  # Interface de login
+  st.title("🔐 Acesso ao Sistema")
+  st.markdown("**Digite a senha para acessar o Gerador de Questões BNCC**")
+  
+  with st.form("login_form"):
+    password = st.text_input("Senha:", type="password", placeholder="Digite a senha...")
+    submit_button = st.form_submit_button("🔓 Entrar", type="primary", use_container_width=True)
+    
+    if submit_button:
+      if password == app_password:
+        st.session_state['authenticated'] = True
+        st.success("✅ Acesso autorizado! Redirecionando...")
+        st.rerun()
+      else:
+        st.error("❌ Senha incorreta! Tente novamente.")
+        return False
+  
+  # Mostrar informações do sistema na parte inferior
+  st.markdown("---")
+  st.markdown("**ℹ️ Sistema de Geração de Questões BNCC - 4º Ano**")
+  st.markdown("Sistema inteligente para geração de questões educacionais baseadas na Base Nacional Comum Curricular.")
+  
+  return False
+
 def main():
   st.title("📚 Gerador de Questões BNCC - 4º Ano")
   st.markdown("Gerador inteligente de questões baseado nos códigos de habilidade da BNCC")
@@ -638,6 +675,12 @@ def display_cache_history():
 def show_system_info():
   """Mostra informações do sistema na sidebar"""
   with st.sidebar:
+    # Botão de logout
+    st.markdown("---")
+    if st.button("🚪 Sair do Sistema", type="secondary", use_container_width=True):
+      st.session_state['authenticated'] = False
+      st.rerun()
+    
     st.header("ℹ️ Informações do Sistema")
     try:
       from pipeline import pipeline
@@ -654,5 +697,10 @@ def show_system_info():
       st.write(f"Erro ao carregar stats: {e}")
 
 if __name__ == "__main__":
+  # Verificar autenticação primeiro
+  if not check_authentication():
+    st.stop()
+  
+  # Se autenticado, mostrar aplicação principal
   show_system_info()
   main()
