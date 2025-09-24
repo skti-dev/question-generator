@@ -12,67 +12,31 @@ chat = ChatOpenAI(
 )
 
 class ValidationOutput(BaseModel):
-  """Estrutura para resultado da validação pelo LLM"""
-  is_aligned: bool = Field(description="Se a questão está alinhada com o código de habilidade")
-  confidence_score: float = Field(ge=0, le=1, description="Confiança da avaliação de 0 a 1")
-  feedback: str = Field(description="Feedback detalhado sobre o alinhamento")
-  suggestions: str = Field(description="Sugestões de melhoria se necessário")
-  cognitive_level_appropriate: bool = Field(description="Se está adequada para o 4º ano")
-  bncc_compliance: bool = Field(description="Se segue as diretrizes da BNCC")
+  """Estrutura simplificada para validação"""
+  is_aligned: bool = Field(description="Se questão alinha com BNCC")
+  confidence_score: float = Field(ge=0, le=1, description="Confiança 0-1")
+  feedback: str = Field(description="Feedback conciso")
 
 # Template para validação
 validation_prompt = ChatPromptTemplate.from_messages([
-  ("system", """Você é um especialista em avaliação educacional e BNCC (Base Nacional Comum Curricular).
-  
-  Sua missão é VALIDAR se uma questão está adequadamente alinhada com um código de habilidade específico.
-  
-  CRITÉRIOS DE AVALIAÇÃO:
-  
-  1. ALINHAMENTO COM CÓDIGO DE HABILIDADE:
-     - A questão aborda EXATAMENTE o que o código de habilidade especifica?
-     - O objeto de conhecimento está sendo avaliado corretamente?
-     - A unidade temática está respeitada?
-  
-  2. ADEQUAÇÃO COGNITIVA (4º ANO - 9/10 ANOS):
-     - Linguagem apropriada para a idade
-     - Complexidade adequada ao nível de desenvolvimento
-     - Conceitos acessíveis para a faixa etária
-     - Contextos familiares às crianças
-  
-  3. QUALIDADE PEDAGÓGICA:
-     - Questão clara e objetiva
-     - Alternativas bem formuladas (para múltipla escolha)
-     - Gabarito correto e justificável
-     - Promove aprendizagem significativa
-  
-  4. CONFORMIDADE BNCC:
-     - Segue as competências e habilidades da BNCC
-     - Respeita os campos de atuação (para português)
-     - Alinhada com as unidades temáticas
-  
-  INSTRUÇÕES:
-  - Seja rigoroso na avaliação
-  - Dê feedback construtivo e específico
-  - Confiança alta (0.8-1.0) apenas para questões excelentes
-  - Confiança média (0.5-0.7) para questões adequadas mas com pequenos problemas
-  - Confiança baixa (0-0.4) para questões com problemas significativos
-  - Sempre forneça sugestões de melhoria, mesmo para questões aprovadas"""),
-  
-  ("human", """Avalie a seguinte questão:
+  ("system", """Valide questão BNCC 4º ano.
 
-  === CÓDIGO DE HABILIDADE ===
-  Código: {codigo}
-  Objeto de Conhecimento: {objeto_conhecimento}
-  Unidade Temática: {unidade_tematica}
-  Matéria: {subject}
+AVALIE:
+1. Alinha com código BNCC?
+2. Adequada para 9-10 anos?
+3. Questão clara, gabarito correto?
+
+CONFIANÇA:
+- 0.8-1.0: Excelente
+- 0.6-0.7: Boa
+- 0-0.5: Problemas"""),
   
-  === QUESTÃO GERADA ===
-  Enunciado: {enunciado}
-  Opções: {opcoes}
-  Gabarito: {gabarito}
-  Tipo: {question_type}
-  
-  Analise se esta questão está adequadamente alinhada com o código de habilidade especificado e apropriada para alunos do 4º ano.""")
+  ("human", """Código: {codigo}
+Habilidade: {objeto_conhecimento}
+
+{enunciado}
+{opcoes}
+Gabarito: {gabarito}""")
 ])
 
 # Chain estruturada para validação
@@ -85,31 +49,22 @@ def validate_question(question: Question, request: QuestionRequest) -> Validatio
   validation_data = {
     "codigo": request.codigo,
     "objeto_conhecimento": request.objeto_conhecimento,
-    "unidade_tematica": request.unidade_tematica,
-    "subject": request.subject.value,
     "enunciado": question.enunciado,
     "opcoes": question.opcoes,
-    "gabarito": question.gabarito,
-    "question_type": question.question_type.value
+    "gabarito": question.gabarito
   }
   
   # Executar validação
   validation_output = validation_chain.invoke(validation_data)
   
-  # Calcular alinhamento geral baseado nos critérios
-  overall_alignment = (
-    validation_output.is_aligned and 
-    validation_output.cognitive_level_appropriate and 
-    validation_output.bncc_compliance and
-    validation_output.confidence_score >= 0.6
-  )
+  # Calcular alinhamento geral
+  overall_alignment = validation_output.is_aligned and validation_output.confidence_score >= 0.6
   
   # Criar resultado da validação
   result = ValidationResult(
     is_aligned=overall_alignment,
     confidence_score=validation_output.confidence_score,
-    feedback=validation_output.feedback,
-    suggestions=validation_output.suggestions if not overall_alignment else None
+    feedback=validation_output.feedback
   )
   
   return result
@@ -127,8 +82,7 @@ def validate_question_batch(questions: list[Question], request: QuestionRequest)
       results.append(ValidationResult(
         is_aligned=False,
         confidence_score=0.0,
-        feedback="Erro durante o processo de validação",
-        suggestions="Revisar a questão manualmente"
+        feedback="Erro na validação"
       ))
   
   return results

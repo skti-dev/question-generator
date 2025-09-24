@@ -31,10 +31,9 @@ class Question(BaseModel):
     return f"[{self.codigo}] QUESTÃO: {self.enunciado}\n{opcoes_text}\n\nGabarito: {self.gabarito}"
 
 class ValidationResult(BaseModel):
-  is_aligned: bool = Field(description="Se a questão está alinhada com o código de habilidade")
-  confidence_score: float = Field(ge=0, le=1, description="Confiança da validação (0-1)")
-  feedback: str = Field(description="Feedback sobre a validação")
-  suggestions: Optional[str] = Field(default=None, description="Sugestões de melhoria")
+  is_aligned: bool = Field(description="Se questão alinha com BNCC")
+  confidence_score: float = Field(ge=0, le=1, description="Confiança (0-1)")
+  feedback: str = Field(description="Feedback da validação")
 
 class QuestionWithValidation(BaseModel):
   question: Question = Field(description="Questão gerada")

@@ -21,40 +21,17 @@ class ScienceQuestionOutput(BaseModel):
 
 # Template para questões de múltipla escolha
 multiple_choice_prompt = ChatPromptTemplate.from_messages([
-  ("system", """Você é um professor especialista em CIÊNCIAS do 4º ano do ensino fundamental.
-  
-  Sua missão é criar questões de MÚLTIPLA ESCOLHA alinhadas com a BNCC (Base Nacional Comum Curricular).
-  
-  INSTRUÇÕES IMPORTANTES:
-  - Use linguagem científica adequada para crianças de 9-10 anos
-  - A questão deve estar DIRETAMENTE relacionada ao código de habilidade fornecido
-  - Crie 4 alternativas (A, B, C, D) sendo apenas 1 correta
-  - As alternativas incorretas devem ser cientificamente incorretas mas plausíveis
-  - Use exemplos do cotidiano e da natureza observável pela criança
-  - Estimule a curiosidade científica e o pensamento investigativo
-  - Evite conceitos muito abstratos ou que exijam conhecimentos avançados
-  
-  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
-  a questão deve ser adequada para essa faixa etária em termos de:
-  - Vocabulário científico acessível
-  - Conceitos adequados ao desenvolvimento cognitivo  
-  - Fenômenos observáveis e próximos da realidade da criança
-  - Contextualização com experiências cotidianas
-  
-  UNIDADES TEMÁTICAS (conforme BNCC):
-  - Matéria e energia
-  - Vida e evolução  
-  - Terra e universo
-  
-  IMPORTANTE: Retorne APENAS UMA questão por vez, bem elaborada e cientificamente correta."""),
-  
-  ("human", """Crie uma questão de múltipla escolha de ciências:
+  ("system", """Crie questão ciências múltipla escolha para 4º ano BNCC.
 
-  CÓDIGO DA HABILIDADE: {codigo}
-  OBJETO DE CONHECIMENTO: {objeto_conhecimento}
-  UNIDADE TEMÁTICA: {unidade_tematica}
+REGRAS:
+- Linguagem científica simples (9-10 anos)
+- 4 alternativas (A,B,C,D), só 1 correta
+- Fenômenos observáveis no cotidiano
+- Siga exatamente o código BNCC"""),
   
-  A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
+  ("human", """Código: {codigo}
+Objeto: {objeto_conhecimento}
+Unidade: {unidade_tematica}""")
 ])
 
 # Chain estruturada - sempre múltipla escolha

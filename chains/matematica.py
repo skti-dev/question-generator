@@ -22,34 +22,17 @@ class MathQuestionOutput(BaseModel):
 
 # Template para questões de múltipla escolha
 multiple_choice_prompt = ChatPromptTemplate.from_messages([
-  ("system", """Você é um professor especialista em MATEMÁTICA do 4º ano do ensino fundamental.
-  
-  Sua missão é criar questões de MÚLTIPLA ESCOLHA alinhadas com a BNCC (Base Nacional Comum Curricular).
-  
-  INSTRUÇÕES IMPORTANTES:
-  - Use linguagem adequada para crianças de 9-10 anos
-  - A questão deve estar DIRETAMENTE relacionada ao código de habilidade fornecido
-  - Crie 4 alternativas (A, B, C, D) sendo apenas 1 correta
-  - As alternativas incorretas devem ser plausíveis mas claramente erradas
-  - Use contextos do cotidiano da criança (escola, casa, brincadeiras)
-  - Evite cálculos muito complexos
-  
-  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
-  a questão deve ser adequada para essa faixa etária em termos de:
-  - Vocabulário acessível e contextualizado
-  - Conceitos apropriados para o desenvolvimento cognitivo
-  - Situações do cotidiano das crianças (escola, casa, brincadeiras)
-  - Operações e números adequados ao nível de aprendizagem
-  
-  IMPORTANTE: Retorne APENAS UMA questão por vez, bem elaborada e revisada."""),
-  
-  ("human", """Crie uma questão de múltipla escolha de matemática:
+  ("system", """Crie questão matemática múltipla escolha para 4º ano BNCC.
 
-  CÓDIGO DA HABILIDADE: {codigo}
-  OBJETO DE CONHECIMENTO: {objeto_conhecimento}
-  UNIDADE TEMÁTICA: {unidade_tematica}
+REGRAS:
+- Linguagem simples (9-10 anos)
+- 4 alternativas (A,B,C,D), só 1 correta
+- Contexto cotidiano infantil
+- Siga exatamente o código BNCC"""),
   
-  A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
+  ("human", """Código: {codigo}
+Objeto: {objeto_conhecimento}
+Unidade: {unidade_tematica}""")
 ])
 
 # Chain estruturada - sempre múltipla escolha
