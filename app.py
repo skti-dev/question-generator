@@ -1,6 +1,5 @@
 import streamlit as st
 import json
-from pathlib import Path
 import sys
 import os
 from dotenv import load_dotenv
@@ -11,8 +10,7 @@ load_dotenv()
 # Configurar path para imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from pipeline import pipeline, get_subjects, get_codes_for_subject, generate_questions
-from models.schemas import QuestionType
+from pipeline import get_subjects, get_codes_for_subject, generate_questions
 
 # Configuração da página
 st.set_page_config(
@@ -192,8 +190,9 @@ def main():
   if 'current_batches' in st.session_state and st.session_state.current_batches:
     display_results(st.session_state.current_batches)
   
-  # Seção do histórico do cache
-  display_cache_history()
+  # Seção do histórico do cache em accordion
+  with st.expander("🗄️ Histórico Completo de Questões", expanded=False):
+    display_cache_history()
 
 def generate_questions_ui():
   """Interface para geração de questões"""
@@ -381,14 +380,254 @@ def display_results(batches):
       st.error(f"❌ Erro na preparação da exportação: {e}")
 
 
+def handle_question_actions():
+  """Processa ações pendentes nas questões"""
+  # Processar exclusão individual
+  if 'delete_question' in st.session_state:
+    delete_data = st.session_state['delete_question']
+    try:
+      from pipeline import pipeline
+      
+      if delete_data['source'] == 'current':
+        # Remover da geração atual e do cache
+        if 'current_batches' in st.session_state:
+          for batch in st.session_state.current_batches:
+            if batch.request.codigo == delete_data['codigo']:
+              # Encontrar e remover a questão específica
+              if delete_data['index'] < len(batch.questions):
+                question_content = batch.questions[delete_data['index']].question.enunciado
+                # Remover do cache usando o enunciado como identificador
+                pipeline.cache_manager.remove_question_by_content(question_content)
+                # Remover da lista local
+                del batch.questions[delete_data['index']]
+                batch.total_generated = len(batch.questions)
+                batch.total_approved = sum(1 for q in batch.questions if q.validation.is_aligned)
+              break
+        st.success("✅ Questão removida com sucesso!")
+      
+      elif delete_data['source'] == 'cache':
+        # Remover apenas do cache
+        cache_key = delete_data['cache_key']
+        pipeline.cache_manager.remove_by_key(cache_key)
+        st.success("✅ Questão removida do cache!")
+        
+    except Exception as e:
+      st.error(f"❌ Erro ao remover questão: {e}")
+    
+    # Limpar ação
+    del st.session_state['delete_question']
+    st.rerun()
+  
+  # Processar exclusão múltipla
+  if 'delete_selected_questions' in st.session_state:
+    selected_items = st.session_state['delete_selected_questions']
+    try:
+      from pipeline import pipeline
+      deleted_count = 0
+      
+      for item in selected_items:
+        if item['source'] == 'current':
+          # Remover da geração atual e do cache
+          if 'current_batches' in st.session_state:
+            for batch in st.session_state.current_batches:
+              if batch.request.codigo == item['codigo']:
+                if item['index'] < len(batch.questions):
+                  question_content = batch.questions[item['index']].question.enunciado
+                  pipeline.cache_manager.remove_question_by_content(question_content)
+                  del batch.questions[item['index']]
+                  batch.total_generated = len(batch.questions)
+                  batch.total_approved = sum(1 for q in batch.questions if q.validation.is_aligned)
+                  deleted_count += 1
+                break
+        elif item['source'] == 'cache':
+          pipeline.cache_manager.remove_by_key(item['cache_key'])
+          deleted_count += 1
+      
+      st.success(f"✅ {deleted_count} questões removidas com sucesso!")
+      
+    except Exception as e:
+      st.error(f"❌ Erro ao remover questões: {e}")
+    
+    # Limpar ação e seleção apropriada
+    del st.session_state['delete_selected_questions']
+    
+    # Limpar as listas de seleção baseado na fonte das questões removidas
+    sources_removed = {item['source'] for item in selected_items}
+    if 'current' in sources_removed and 'selected_questions_current' in st.session_state:
+      st.session_state['selected_questions_current'] = []
+    if 'cache' in sources_removed and 'selected_questions_cache' in st.session_state:
+      st.session_state['selected_questions_cache'] = []
+    
+    st.rerun()
+
+
+def export_individual_question(question, validation, codigo, filename_suffix=""):
+  """Exporta uma questão individual"""
+  try:
+    from datetime import datetime
+    
+    export_data = {
+      "codigo": codigo,
+      "data_exportacao": datetime.now().isoformat(),
+      "questao": {
+        "enunciado": question.enunciado,
+        "opcoes": question.opcoes,
+        "gabarito": question.gabarito,
+        "tipo": question.question_type.value,
+        "questao_formatada": question.format_question()
+      },
+      "validacao": {
+        "alinhada": validation.is_aligned,
+        "confianca": validation.confidence_score,
+        "feedback": validation.feedback
+      }
+    }
+    
+    json_data = json.dumps(export_data, ensure_ascii=False, indent=2)
+    filename = f"{codigo}{filename_suffix}_questao_individual.json"
+    
+    return json_data, filename
+    
+  except Exception as e:
+    st.error(f"❌ Erro ao preparar exportação individual: {e}")
+    return None, None
+
+
+def export_selected_questions(selected_items):
+  """Exporta questões selecionadas"""
+  try:
+    from datetime import datetime
+    from pipeline import pipeline
+    
+    export_data = {
+      "data_exportacao": datetime.now().isoformat(),
+      "total_questoes": len(selected_items),
+      "questoes": []
+    }
+    
+    # Coletar dados das questões selecionadas
+    for item in selected_items:
+      if item['source'] == 'current':
+        # Buscar na geração atual
+        if 'current_batches' in st.session_state:
+          for batch in st.session_state.current_batches:
+            if batch.request.codigo == item['codigo']:
+              if item['index'] < len(batch.questions):
+                q = batch.questions[item['index']]
+                export_data["questoes"].append({
+                  "codigo": item['codigo'],
+                  "questao": {
+                    "enunciado": q.question.enunciado,
+                    "opcoes": q.question.opcoes,
+                    "gabarito": q.question.gabarito,
+                    "tipo": q.question.question_type.value,
+                    "questao_formatada": q.question.format_question()
+                  },
+                  "validacao": {
+                    "alinhada": q.validation.is_aligned,
+                    "confianca": q.validation.confidence_score,
+                    "feedback": q.validation.feedback
+                  }
+                })
+              break
+      
+      elif item['source'] == 'cache':
+        # Buscar no cache
+        cache_entries = pipeline.cache_manager.get_all_cache_entries()
+        for entry in cache_entries:
+          if entry.cache_key == item['cache_key']:
+            export_data["questoes"].append({
+              "codigo": entry.question.codigo,
+              "questao": {
+                "enunciado": entry.question.enunciado,
+                "opcoes": entry.question.opcoes,
+                "gabarito": entry.question.gabarito,
+                "tipo": entry.question.question_type.value,
+                "questao_formatada": entry.question.format_question()
+              },
+              "validacao": {
+                "alinhada": entry.validation.is_aligned,
+                "confianca": entry.validation.confidence_score,
+                "feedback": entry.validation.feedback
+              }
+            })
+            break
+    
+    json_data = json.dumps(export_data, ensure_ascii=False, indent=2)
+    
+    # Gerar nome do arquivo baseado nos códigos
+    codes = list(set([item['codigo'] for item in selected_items]))
+    codes_str = "_".join(sorted(codes))
+    filename = f"{codes_str}_questoes_selecionadas.json"
+    
+    return json_data, filename
+    
+  except Exception as e:
+    st.error(f"❌ Erro ao preparar exportação de questões selecionadas: {e}")
+    return None, None
+
+
 def display_questions_table(batches):
-  """Exibe tabela com todas as questões geradas (aprovadas e rejeitadas)"""
+  """Exibe tabela com todas as questões geradas (aprovadas e rejeitadas) com ações"""
   import pandas as pd
   
-  table_data = []
+  # Processar ações pendentes
+  handle_question_actions()
   
-  for batch in batches:
-    # Processar TODAS as questões, não só as aprovadas
+  # Inicializar seleção se não existir
+  if 'selected_questions_current' not in st.session_state:
+    st.session_state['selected_questions_current'] = []
+  
+  st.markdown("#### 🔧 Ações Disponíveis")
+  
+  # Barra de ações
+  col1, col2, col3, col4 = st.columns(4)
+  
+  with col1:
+    if st.button("📋 Selecionar Todas", key="select_all_current"):
+      # Selecionar todas as questões da geração atual
+      st.session_state['selected_questions_current'] = []
+      for i, batch in enumerate(batches):
+        for j, _ in enumerate(batch.questions):
+          st.session_state['selected_questions_current'].append({
+            'source': 'current',
+            'codigo': batch.request.codigo,
+            'batch_index': i,
+            'index': j
+          })
+      st.rerun()
+  
+  with col2:
+    if st.button("🗑️ Excluir Selecionadas", key="delete_selected_current", 
+                 disabled=len(st.session_state['selected_questions_current']) == 0):
+      if len(st.session_state['selected_questions_current']) > 0:
+        st.session_state['delete_selected_questions'] = st.session_state['selected_questions_current']
+        st.rerun()
+  
+  with col3:
+    if st.button("💾 Exportar Selecionadas", key="export_selected_current",
+                 disabled=len(st.session_state['selected_questions_current']) == 0):
+      if len(st.session_state['selected_questions_current']) > 0:
+        json_data, filename = export_selected_questions(st.session_state['selected_questions_current'])
+        if json_data and filename:
+          st.download_button(
+            label=f"📥 Download {len(st.session_state['selected_questions_current'])} Questões",
+            data=json_data,
+            file_name=filename,
+            mime="application/json",
+            key="download_selected_current"
+          )
+  
+  with col4:
+    selected_count = len(st.session_state['selected_questions_current'])
+    st.metric("Selecionadas", selected_count)
+  
+  st.markdown("---")
+  
+  # Tabela com questões e ações individuais
+  for i, batch in enumerate(batches):
+    st.markdown(f"### 📖 {batch.request.codigo} - {batch.request.objeto_conhecimento[:60]}...")
+    
     for j, question_with_validation in enumerate(batch.questions):
       question = question_with_validation.question
       validation = question_with_validation.validation
@@ -409,56 +648,115 @@ def display_questions_table(batches):
       else:
         confidence_icon = "🔴"
       
-      table_data.append({
-        "Status": f"{status_icon} {status_text}",
-        "Código": batch.request.codigo,
-        "Tipo": question.question_type.value.replace('_', ' ').title(),
-        "Questão": question.enunciado[:80] + "..." if len(question.enunciado) > 80 else question.enunciado,
-        "Gabarito": question.gabarito,
-        "Confiança": f"{confidence_icon} {validation.confidence_score:.2f}",
-        "Motivo": validation.feedback[:50] + "..." if len(validation.feedback) > 50 else validation.feedback
-      })
+      # Container para cada questão
+      with st.container():
+        col1, col2 = st.columns([4, 1])
+        
+        with col1:
+          # Checkbox para seleção
+          item_selected = {
+            'source': 'current',
+            'codigo': batch.request.codigo,
+            'batch_index': i,
+            'index': j
+          }
+          
+          is_selected = any(
+            item['batch_index'] == i and item['index'] == j 
+            for item in st.session_state['selected_questions_current']
+          )
+          
+          checkbox_changed = False
+          
+          if st.checkbox(
+            f"{status_icon} **{batch.request.codigo}** - {question.enunciado[:80]}{'...' if len(question.enunciado) > 80 else ''}",
+            key=f"select_current_{i}_{j}",
+            value=is_selected
+          ):
+            if item_selected not in st.session_state['selected_questions_current']:
+              st.session_state['selected_questions_current'].append(item_selected)
+              checkbox_changed = True
+          else:
+            if any(item['batch_index'] == i and item['index'] == j for item in st.session_state['selected_questions_current']):
+              st.session_state['selected_questions_current'] = [
+                item for item in st.session_state['selected_questions_current']
+                if not (item['batch_index'] == i and item['index'] == j)
+              ]
+              checkbox_changed = True
+          
+          # Forçar atualização se houve mudança
+          if checkbox_changed:
+            st.rerun()
+          
+          # Informações da questão
+          col_info1, col_info2, col_info3 = st.columns(3)
+          with col_info1:
+            st.write(f"**Tipo:** {question.question_type.value.replace('_', ' ').title()}")
+          with col_info2:
+            st.write(f"**Gabarito:** {question.gabarito}")
+          with col_info3:
+            st.write(f"**Confiança:** {confidence_icon} {validation.confidence_score:.2f}")
+        
+        with col2:
+          # Ações individuais
+          st.markdown("**Ações:**")
+          
+          # Botão ver questão completa (toggle)
+          show_question_key = f"show_current_{i}_{j}"
+          button_text = "🙈 Ocultar questão" if st.session_state.get(show_question_key, False) else "👁️ Ver questão completa"
+          
+          if st.button(button_text, help="Alternar visualização da questão", key=f"view_current_{i}_{j}"):
+            st.session_state[show_question_key] = not st.session_state.get(show_question_key, False)
+            st.rerun()
+          
+          # Mostrar questão se solicitado
+          if st.session_state.get(show_question_key, False):
+            st.code(question.format_question(), language="text")
+          
+          # Botão exportar individual
+          json_data, filename = export_individual_question(
+            question, validation, batch.request.codigo, f"_atual_{j+1}"
+          )
+          if json_data and filename:
+            st.download_button(
+              label="💾",
+              data=json_data,
+              file_name=filename,
+              mime="application/json",
+              help="Exportar questão individual",
+              key=f"export_current_{i}_{j}"
+            )
+          
+          # Botão excluir individual
+          if st.button("🗑️", help="Excluir questão", key=f"delete_current_{i}_{j}"):
+            st.session_state['delete_question'] = {
+              'source': 'current',
+              'codigo': batch.request.codigo,
+              'index': j
+            }
+            st.rerun()
+      
+      st.divider()
   
-  if table_data:
-    df = pd.DataFrame(table_data)
-    
-    st.dataframe(
-      df,
-      use_container_width=True,
-      height=400,
-      hide_index=True,
-      column_config={
-        "Status": st.column_config.TextColumn("Status", width=100),
-        "Código": st.column_config.TextColumn("Código", width=100),
-        "Tipo": st.column_config.TextColumn("Tipo", width=120),
-        "Questão": st.column_config.TextColumn("Questão", width=300),
-        "Gabarito": st.column_config.TextColumn("Gabarito", width=100),
-        "Confiança": st.column_config.TextColumn("Confiança", width=100),
-        "Motivo": st.column_config.TextColumn("Motivo", width=200)
-      }
-    )
-    
-    # Estatísticas da tabela
-    approved_count = sum(1 for item in table_data if "Aprovada" in item["Status"])
-    rejected_count = sum(1 for item in table_data if "Rejeitada" in item["Status"])
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-      st.metric("✅ Aprovadas", approved_count)
-    with col2:
-      st.metric("❌ Rejeitadas", rejected_count)
-    with col3:
-      st.metric("📊 Total", len(table_data))
-    
-  else:
-    st.warning("⚠️ Nenhuma questão encontrada para exibir.")
+  # Estatísticas finais
+  total_questions = sum(len(batch.questions) for batch in batches)
+  total_approved = sum(sum(1 for q in batch.questions if q.validation.is_aligned) for batch in batches)
+  total_rejected = total_questions - total_approved
+  
+  col1, col2, col3 = st.columns(3)
+  with col1:
+    st.metric("✅ Aprovadas", total_approved)
+  with col2:
+    st.metric("❌ Rejeitadas", total_rejected)
+  with col3:
+    st.metric("📊 Total", total_questions)
 
 
 def display_cache_history():
-  """Exibe histórico completo de questões do cache"""
+  """Exibe histórico completo de questões do cache com ações"""
   
-  st.markdown("---")
-  st.header("🗄️ Histórico Completo de Questões")
+  # Processar ações pendentes
+  handle_question_actions()
   
   try:
     # Buscar todas as questões do cache
@@ -469,52 +767,51 @@ def display_cache_history():
       st.info("📭 Nenhuma questão encontrada no cache.")
       return
     
+    # Inicializar seleção se não existir
+    if 'selected_questions_cache' not in st.session_state:
+      st.session_state['selected_questions_cache'] = []
     
-    # Preparar dados para tabela
-    import pandas as pd
-    cache_table_data = []
+    st.markdown("#### 🔧 Ações Disponíveis")
     
-    for entry in cache_entries:
-      try:
-        # Extrair informações da questão usando a estrutura CacheEntry
-        question = entry.question
-        validation = entry.validation
-        
-        # Ícone de confiança
-        confidence_score = validation.confidence_score
-        confidence_icon = "🟢" if confidence_score >= 0.8 else "🟡" if confidence_score >= 0.6 else "🔴"
-        
-        # Converter created_at string para datetime com tratamento de erro
-        from datetime import datetime
-        try:
-          if isinstance(entry.created_at, str):
-            # Tentar diferentes formatos de data
-            try:
-              created_at = datetime.fromisoformat(entry.created_at.replace('Z', '+00:00'))
-            except ValueError:
-              try:
-                created_at = datetime.strptime(entry.created_at, "%Y-%m-%d %H:%M:%S.%f")
-              except ValueError:
-                created_at = datetime.strptime(entry.created_at, "%Y-%m-%d %H:%M:%S")
-          else:
-            created_at = entry.created_at
-        except (ValueError, TypeError) as e:
-          # Se não conseguir converter, usar data atual como fallback
-          created_at = datetime.now()
-          st.warning(f"⚠️ Erro ao converter data para entrada {entry.cache_key}: {e}")
-        
-        cache_table_data.append({
-          "Data": created_at.strftime("%d/%m/%Y %H:%M"),
-          "Código": question.codigo,
-          "Tipo": question.question_type.value.replace('_', ' ').title(),
-          "Questão": question.enunciado[:100] + "..." if len(question.enunciado) > 100 else question.enunciado,
-          "Gabarito": question.gabarito,
-          "Confiança": f"{confidence_icon} {confidence_score:.2f}",
-          "Questão Completa": question.format_question()
-        })
-      except Exception as e:
-        st.warning(f"⚠️ Erro ao processar entrada do cache: {e}")
-        continue
+    # Barra de ações
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+      if st.button("📋 Selecionar Todas", key="select_all_cache"):
+        st.session_state['selected_questions_cache'] = []
+        for i, entry in enumerate(cache_entries):
+          st.session_state['selected_questions_cache'].append({
+            'source': 'cache',
+            'cache_key': entry.cache_key,
+            'codigo': entry.question.codigo,
+            'index': i
+          })
+        st.rerun()
+    
+    with col2:
+      if st.button("🗑️ Excluir Selecionadas", key="delete_selected_cache", 
+                   disabled=len(st.session_state['selected_questions_cache']) == 0):
+        if len(st.session_state['selected_questions_cache']) > 0:
+          st.session_state['delete_selected_questions'] = st.session_state['selected_questions_cache']
+          st.rerun()
+    
+    with col3:
+      if st.button("💾 Exportar Selecionadas", key="export_selected_cache",
+                   disabled=len(st.session_state['selected_questions_cache']) == 0):
+        if len(st.session_state['selected_questions_cache']) > 0:
+          json_data, filename = export_selected_questions(st.session_state['selected_questions_cache'])
+          if json_data and filename:
+            st.download_button(
+              label=f"📥 Download {len(st.session_state['selected_questions_cache'])} Questões",
+              data=json_data,
+              file_name=filename,
+              mime="application/json",
+              key="download_selected_cache"
+            )
+    
+    with col4:
+      selected_count = len(st.session_state['selected_questions_cache'])
+      st.metric("Selecionadas", selected_count)
     
     # Mostrar estatísticas do cache
     try:
@@ -527,14 +824,12 @@ def display_cache_history():
           st.metric("Alta Confiança", high_confidence)
         except Exception as e:
           st.metric("Alta Confiança", "Erro")
-          st.error(f"Erro no cálculo de alta confiança: {e}")
       with col3:
         try:
           unique_codes = len({entry.question.codigo for entry in cache_entries})
           st.metric("Códigos Únicos", unique_codes)
         except Exception as e:
           st.metric("Códigos Únicos", "Erro")
-          st.error(f"Erro no cálculo de códigos únicos: {e}")
       with col4:
         try:
           from datetime import datetime
@@ -542,7 +837,6 @@ def display_cache_history():
           for entry in cache_entries:
             try:
               if isinstance(entry.created_at, str):
-                # Tentar diferentes formatos de data
                 try:
                   date_obj = datetime.fromisoformat(entry.created_at.replace('Z', '+00:00'))
                 except ValueError:
@@ -554,7 +848,6 @@ def display_cache_history():
               else:
                 latest_dates.append(entry.created_at)
             except (ValueError, TypeError):
-              # Ignorar entradas com datas inválidas
               continue
           
           if latest_dates:
@@ -564,94 +857,189 @@ def display_cache_history():
             st.metric("Última Atualização", "N/A")
         except Exception as e:
           st.metric("Última Atualização", "Erro")
-          st.error(f"Erro no cálculo da última atualização: {e}")
     except Exception as stats_error:
       st.error(f"Erro geral nas estatísticas: {stats_error}")
     
-    # Tabela do histórico
-    if cache_table_data:
+    st.markdown("---")
+    
+    # Lista de questões com ações individuais
+    for i, entry in enumerate(cache_entries):
       try:
-        df_cache = pd.DataFrame(cache_table_data)
+        question = entry.question
+        validation = entry.validation
         
-        # Verificar se todas as colunas necessárias existem
-        required_columns = ["Data", "Código", "Tipo", "Questão", "Gabarito", "Confiança"]
-        available_columns = [col for col in required_columns if col in df_cache.columns]
+        # Ícone de confiança
+        confidence_score = validation.confidence_score
+        confidence_icon = "🟢" if confidence_score >= 0.8 else "🟡" if confidence_score >= 0.6 else "🔴"
         
-        if available_columns:
-          # Mostrar tabela
-          st.dataframe(
-            df_cache[available_columns],
-            use_container_width=True,
-            height=500,
-            hide_index=True,
-            column_config={
-              "Data": st.column_config.TextColumn("Data", width=120),
-              "Código": st.column_config.TextColumn("Código", width=100),
-              "Tipo": st.column_config.TextColumn("Tipo", width=120),
-              "Questão": st.column_config.TextColumn("Questão", width=300),
-              "Gabarito": st.column_config.TextColumn("Gabarito", width=100),
-              "Confiança": st.column_config.TextColumn("Confiança", width=100),
+        # Status da questão
+        status_icon = "✅" if validation.is_aligned else "❌"
+        
+        # Converter created_at para string
+        from datetime import datetime
+        try:
+          if isinstance(entry.created_at, str):
+            try:
+              created_at = datetime.fromisoformat(entry.created_at.replace('Z', '+00:00'))
+            except ValueError:
+              try:
+                created_at = datetime.strptime(entry.created_at, "%Y-%m-%d %H:%M:%S.%f")
+              except ValueError:
+                created_at = datetime.strptime(entry.created_at, "%Y-%m-%d %H:%M:%S")
+          else:
+            created_at = entry.created_at
+          date_str = created_at.strftime("%d/%m/%Y %H:%M")
+        except (ValueError, TypeError):
+          date_str = "Data inválida"
+        
+        # Container para cada questão
+        with st.container():
+          col1, col2 = st.columns([4, 1])
+          
+          with col1:
+            # Checkbox para seleção
+            item_selected = {
+              'source': 'cache',
+              'cache_key': entry.cache_key,
+              'codigo': question.codigo,
+              'index': i
             }
+            
+            is_selected = any(
+              item['cache_key'] == entry.cache_key 
+              for item in st.session_state['selected_questions_cache']
+            )
+            
+            checkbox_changed = False
+            
+            if st.checkbox(
+              f"{status_icon} **{question.codigo}** - {question.enunciado[:80]}{'...' if len(question.enunciado) > 80 else ''}",
+              key=f"select_cache_{i}",
+              value=is_selected
+            ):
+              if item_selected not in st.session_state['selected_questions_cache']:
+                st.session_state['selected_questions_cache'].append(item_selected)
+                checkbox_changed = True
+            else:
+              if any(item['cache_key'] == entry.cache_key for item in st.session_state['selected_questions_cache']):
+                st.session_state['selected_questions_cache'] = [
+                  item for item in st.session_state['selected_questions_cache']
+                  if item['cache_key'] != entry.cache_key
+                ]
+                checkbox_changed = True
+            
+            # Forçar atualização se houve mudança
+            if checkbox_changed:
+              st.rerun()
+            
+            # Informações da questão
+            col_info1, col_info2, col_info3, col_info4 = st.columns(4)
+            with col_info1:
+              st.write(f"**Data:** {date_str}")
+            with col_info2:
+              st.write(f"**Tipo:** {question.question_type.value.replace('_', ' ').title()}")
+            with col_info3:
+              st.write(f"**Gabarito:** {question.gabarito}")
+            with col_info4:
+              st.write(f"**Confiança:** {confidence_icon} {confidence_score:.2f}")
+          
+          with col2:
+            # Ações individuais
+            st.markdown("**Ações:**")
+            
+            # Botão ver questão completa (toggle)
+            show_question_key = f"show_cache_{i}"
+            button_text = "🙈 Ocultar questão" if st.session_state.get(show_question_key, False) else "👁️ Ver questão completa"
+            
+            if st.button(button_text, help="Alternar visualização da questão", key=f"view_cache_{i}"):
+              st.session_state[show_question_key] = not st.session_state.get(show_question_key, False)
+              st.rerun()
+            
+            # Mostrar questão se solicitado
+            if st.session_state.get(show_question_key, False):
+              st.code(question.format_question(), language="text")
+            
+            # Botão exportar individual
+            json_data, filename = export_individual_question(
+              question, validation, question.codigo, f"_cache_{i+1}"
+            )
+            if json_data and filename:
+              st.download_button(
+                label="💾",
+                data=json_data,
+                file_name=filename,
+                mime="application/json",
+                help="Exportar questão individual",
+                key=f"export_cache_{i}"
+              )
+            
+            # Botão excluir individual
+            if st.button("🗑️", help="Excluir do cache", key=f"delete_cache_{i}"):
+              st.session_state['delete_question'] = {
+                'source': 'cache',
+                'cache_key': entry.cache_key
+              }
+              st.rerun()
+        
+        st.divider()
+        
+      except Exception as e:
+        st.warning(f"⚠️ Erro ao processar entrada do cache: {e}")
+        continue
+    
+    # Botão de exportação do histórico completo (mantido como estava)
+    st.markdown("---")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+      try:
+        # Preparar dados completos para exportação
+        export_data = []
+        for entry in cache_entries:
+          try:
+            if isinstance(entry.created_at, str):
+              created_at_str = entry.created_at
+            else:
+              try:
+                created_at_str = entry.created_at.isoformat()
+              except AttributeError:
+                created_at_str = str(entry.created_at)
+            
+            export_data.append({
+              "codigo": entry.question.codigo,
+              "tipo": entry.question.question_type.value,
+              "data_criacao": created_at_str,
+              "questao": {
+                "enunciado": entry.question.enunciado,
+                "opcoes": entry.question.opcoes,
+                "gabarito": entry.question.gabarito,
+                "questao_formatada": entry.question.format_question()
+              },
+              "validacao": {
+                "alinhada": entry.validation.is_aligned,
+                "confianca": entry.validation.confidence_score,
+                "feedback": entry.validation.feedback
+              }
+            })
+          except Exception as entry_error:
+            st.warning(f"⚠️ Erro ao preparar exportação para entrada {entry.cache_key}: {entry_error}")
+            continue
+        
+        if export_data:
+          json_export = json.dumps(export_data, ensure_ascii=False, indent=2)
+          
+          st.download_button(
+            label="📥 Exportar Histórico Completo (JSON)",
+            data=json_export,
+            file_name="historico_completo_questoes.json",
+            mime="application/json",
+            type="secondary",
+            use_container_width=True
           )
         else:
-          st.error("❌ Colunas necessárias não encontradas nos dados do cache")
-      except Exception as table_error:
-        st.error(f"❌ Erro ao criar tabela do histórico: {table_error}")
-        st.write("Dados disponíveis:", cache_table_data[:2] if cache_table_data else "Nenhum")
-      
-      # Botão de exportação do histórico completo
-      col1, col2, col3 = st.columns([1, 2, 1])
-      with col2:
-        try:
-          # Preparar dados completos para exportação
-          export_data = []
-          for entry in cache_entries:
-            try:
-              # Converter created_at para string se necessário com tratamento de erro
-              if isinstance(entry.created_at, str):
-                created_at_str = entry.created_at
-              else:
-                try:
-                  created_at_str = entry.created_at.isoformat()
-                except AttributeError:
-                  created_at_str = str(entry.created_at)
-              
-              export_data.append({
-                "codigo": entry.question.codigo,
-                "tipo": entry.question.question_type.value,
-                "data_criacao": created_at_str,
-                "questao": {
-                  "enunciado": entry.question.enunciado,
-                  "opcoes": entry.question.opcoes,
-                  "gabarito": entry.question.gabarito,
-                  "questao_formatada": entry.question.format_question()
-                },
-                "validacao": {
-                  "alinhada": entry.validation.is_aligned,
-                  "confianca": entry.validation.confidence_score,
-                  "feedback": entry.validation.feedback
-                }
-              })
-            except Exception as entry_error:
-              st.warning(f"⚠️ Erro ao preparar exportação para entrada {entry.cache_key}: {entry_error}")
-              continue
-          
-          if export_data:
-            json_export = json.dumps(export_data, ensure_ascii=False, indent=2)
-            
-            st.download_button(
-              label="📥 Exportar Histórico Completo (JSON)",
-              data=json_export,
-              file_name="historico_completo_questoes.json",
-              mime="application/json",
-              type="secondary",
-              use_container_width=True
-            )
-          else:
-            st.warning("⚠️ Nenhum dado válido para exportação")
-        except Exception as export_error:
-          st.error(f"❌ Erro na preparação da exportação: {export_error}")
-    
+          st.warning("⚠️ Nenhum dado válido para exportação")
+      except Exception as export_error:
+        st.error(f"❌ Erro na preparação da exportação: {export_error}")
+  
   except Exception as e:
     st.error(f"❌ Erro ao carregar histórico do cache: {e}")
 
