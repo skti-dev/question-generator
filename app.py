@@ -362,11 +362,16 @@ def display_results(batches):
       with open(output_path, 'r', encoding='utf-8') as f:
         json_data = f.read()
       
+      # Gerar nome do arquivo com códigos
+      codes_list = [batch.request.codigo for batch in batches]
+      codes_str = "_".join(codes_list)
+      file_name = f"{codes_str}_questoes_bncc_4ano.json"
+      
       # Botão de download direto
       st.download_button(
         label="💾 Exportar Geração Atual (JSON)",
         data=json_data,
-        file_name="questoes_bncc_4ano.json",
+        file_name=file_name,
         mime="application/json",
         type="primary",
         use_container_width=True
