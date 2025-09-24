@@ -16,8 +16,8 @@ chat = ChatOpenAI(
 class MathQuestionOutput(BaseModel):
   """Estrutura para questão de matemática gerada pelo LLM"""
   enunciado: str = Field(description="Enunciado claro e objetivo da questão")
-  opcoes: Optional[List[str]] = Field(description="4 opções para múltipla escolha (apenas se aplicável)")
-  gabarito: str = Field(description="Resposta correta (A/B/C/D para múltipla escolha, Verdadeiro/Falso para V/F)")
+  opcoes: List[str] = Field(description="4 opções para múltipla escolha")
+  gabarito: str = Field(description="Resposta correta (A/B/C/D)")
   explicacao: str = Field(description="Breve explicação da resposta para contexto")
 
 # Template para questões de múltipla escolha
@@ -52,40 +52,8 @@ multiple_choice_prompt = ChatPromptTemplate.from_messages([
   A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
 ])
 
-# Template para questões verdadeiro/falso
-true_false_prompt = ChatPromptTemplate.from_messages([
-  ("system", """Você é um professor especialista em MATEMÁTICA do 4º ano do ensino fundamental.
-  
-  Sua missão é criar questões de VERDADEIRO ou FALSO alinhadas com a BNCC.
-  
-  INSTRUÇÕES IMPORTANTES:
-  - Use linguagem adequada para crianças de 9-10 anos
-  - A afirmação deve estar DIRETAMENTE relacionada ao código de habilidade
-  - Crie afirmações claras que permitam resposta definitiva (V ou F)
-  - Evite afirmações ambíguas ou que dependam de interpretação
-  - Use contextos familiares às crianças
-  
-  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
-  a questão deve ser adequada para essa faixa etária em termos de:
-  - Vocabulário acessível e contextualizado
-  - Afirmações claras que permitam resposta definitiva (V ou F)
-  - Situações familiares às crianças
-  - Conceitos apropriados para o desenvolvimento cognitivo
-  
-  IMPORTANTE: O gabarito deve ser EXATAMENTE "Verdadeiro" ou "Falso"."""),
-  
-  ("human", """Crie uma questão de verdadeiro/falso de matemática:
-
-  CÓDIGO DA HABILIDADE: {codigo}
-  OBJETO DE CONHECIMENTO: {objeto_conhecimento}
-  UNIDADE TEMÁTICA: {unidade_tematica}
-  
-  A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
-])
-
-# Chains estruturadas
+# Chain estruturada - sempre múltipla escolha
 multiple_choice_chain = multiple_choice_prompt | chat.with_structured_output(MathQuestionOutput)
-true_false_chain = true_false_prompt | chat.with_structured_output(MathQuestionOutput)
 
 def create_math_question(request: QuestionRequest) -> Question:
   """Cria uma questão de matemática baseada na solicitação"""
@@ -97,21 +65,16 @@ def create_math_question(request: QuestionRequest) -> Question:
     "unidade_tematica": request.unidade_tematica
   }
   
-  # Escolher chain baseado no tipo de questão
-  if request.question_type == QuestionType.MULTIPLE_CHOICE:
-    chain_output = multiple_choice_chain.invoke(prompt_data)
-    opcoes = chain_output.opcoes
-  else:  # TRUE_FALSE
-    chain_output = true_false_chain.invoke(prompt_data)
-    opcoes = None
+  # Sempre gerar questão de múltipla escolha
+  chain_output = multiple_choice_chain.invoke(prompt_data)
   
   # Criar objeto Question
   question = Question(
     codigo=request.codigo,
     enunciado=chain_output.enunciado,
-    opcoes=opcoes,
+    opcoes=chain_output.opcoes,
     gabarito=chain_output.gabarito,
-    question_type=request.question_type
+    question_type=QuestionType.MULTIPLE_CHOICE
   )
   
   return question

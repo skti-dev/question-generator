@@ -88,7 +88,7 @@ def validate_question(question: Question, request: QuestionRequest) -> Validatio
     "unidade_tematica": request.unidade_tematica,
     "subject": request.subject.value,
     "enunciado": question.enunciado,
-    "opcoes": question.opcoes if question.opcoes else "N/A (Verdadeiro/Falso)",
+    "opcoes": question.opcoes,
     "gabarito": question.gabarito,
     "question_type": question.question_type.value
   }

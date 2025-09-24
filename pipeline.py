@@ -261,28 +261,15 @@ class QuestionGeneratorPipeline:
     self,
     codes: List[str],
     questions_per_code: int = 3,
-    multiple_choice_ratio: float = 0.7,
     use_cache: bool = True
   ) -> List[QuestionBatch]:
-    """Gera questões com distribuição customizada"""
+    """Gera questões com distribuição customizada - sempre múltipla escolha"""
     
     results = []
     
     for code in codes:
-      # Calcular distribuição de tipos
-      mc_count = int(questions_per_code * multiple_choice_ratio)
-      tf_count = questions_per_code - mc_count
-      
-      # Criar lista de tipos: primeiro múltipla escolha, depois verdadeiro/falso
-      question_types_ordered = []
-      for _ in range(mc_count):
-        question_types_ordered.append(QuestionType.MULTIPLE_CHOICE)
-      for _ in range(tf_count):
-        question_types_ordered.append(QuestionType.TRUE_FALSE)
-      
-      # Embaralhar os tipos
-      import random
-      random.shuffle(question_types_ordered)
+      # Todas as questões serão múltipla escolha
+      question_types_ordered = [QuestionType.MULTIPLE_CHOICE] * questions_per_code
       
       # Gerar batch para este código
       batch = self.generate_questions_batch(
@@ -331,12 +318,10 @@ def get_codes_for_subject(subject: str) -> List[Dict[str, str]]:
 
 def generate_questions(
   codes: List[str],
-  questions_per_code: int = 3, 
-  multiple_choice_ratio: float = 0.7
+  questions_per_code: int = 3
 ) -> List[QuestionBatch]:
-  """Função principal para gerar questões"""
+  """Função principal para gerar questões - sempre múltipla escolha"""
   return pipeline.generate_custom_distribution(
     codes=codes,
-    questions_per_code=questions_per_code,
-    multiple_choice_ratio=multiple_choice_ratio
+    questions_per_code=questions_per_code
   )

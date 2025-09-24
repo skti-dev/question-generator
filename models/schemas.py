@@ -4,7 +4,6 @@ from enum import Enum
 
 class QuestionType(str, Enum):
   MULTIPLE_CHOICE = "multipla_escolha"
-  TRUE_FALSE = "verdadeiro_falso"
 
 class Subject(str, Enum):
   MATEMATICA = "Matemática"
@@ -27,12 +26,9 @@ class Question(BaseModel):
   question_type: QuestionType = Field(description="Tipo de questão")
   
   def format_question(self) -> str:
-    """Formata a questão no padrão solicitado"""
-    if self.question_type == QuestionType.MULTIPLE_CHOICE:
-      opcoes_text = "\n".join([f"{chr(65+i)}) {opcao}" for i, opcao in enumerate(self.opcoes)])
-      return f"[{self.codigo}] QUESTÃO: {self.enunciado}\n{opcoes_text}\n\nGabarito: {self.gabarito}"
-    else:  # TRUE_FALSE
-      return f"[{self.codigo}] QUESTÃO: {self.enunciado}\n( ) Verdadeiro\n( ) Falso\n\nGabarito: {self.gabarito}"
+    """Formata a questão no padrão solicitado - sempre múltipla escolha"""
+    opcoes_text = "\n".join([f"{chr(65+i)}) {opcao}" for i, opcao in enumerate(self.opcoes)])
+    return f"[{self.codigo}] QUESTÃO: {self.enunciado}\n{opcoes_text}\n\nGabarito: {self.gabarito}"
 
 class ValidationResult(BaseModel):
   is_aligned: bool = Field(description="Se a questão está alinhada com o código de habilidade")

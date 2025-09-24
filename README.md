@@ -1,6 +1,6 @@
 # 📚 Gerador de Questões BNCC - 4º Ano
 
-Sistema int- **🤖 Geração automática** de questões múltipla escolha e verdadeiro/falso
+Sistema inteligente para geração automática de questões educacionais baseadas nos códigos de habilidade da BNCC (Base Nacional Comum Curricular) para o 4º ano do ensino fundamental.
 
 - **🔐 Sistema de autenticação** com senha protegida
 - **🎯 Validação inteligente** de alinhamento com códigos BNCC
@@ -65,7 +65,7 @@ question_generator/
 
 ## 🎯 Funcionalidades
 
-- **🤖 Geração automática** de questões múltipla escolha e verdadeiro/falso
+- **🤖 Geração automática** de questões múltipla escolha
 - **🔐 Sistema de autenticação** com senha protegida
 - **🎯 Validação inteligente** de alinhamento com códigos BNCC
 - **� Distribuição personalizável** por dificuldade (fácil, médio, difícil)
@@ -169,8 +169,7 @@ from pipeline import generate_questions
 # Gerar questões para códigos específicos
 batches = generate_questions(
     codes=["EF04MA01", "EF04CI01", "EF04LP01"],
-    questions_per_code=3,  # 3 questões por código
-    multiple_choice_ratio=0.8  # 80% múltipla escolha, 20% V/F
+    questions_per_code=3  # 3 questões de múltipla escolha por código
 )
 
 # Processar resultados

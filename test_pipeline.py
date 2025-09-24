@@ -52,8 +52,7 @@ try:
       
       batches = generate_questions(
         codes=[test_code],
-        questions_per_code=1,
-        multiple_choice_ratio=1.0
+        questions_per_code=1
       )
       
       if batches and len(batches) > 0:

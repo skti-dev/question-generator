@@ -161,17 +161,6 @@ def main():
         with col2:
           pass  # Coluna vazia para espaçamento
         
-        # Proporção de tipos de questão
-        st.subheader("📝 Tipos de Questão")
-        multiple_choice_ratio = st.slider(
-          "% Múltipla Escolha",
-          min_value=0.0,
-          max_value=1.0,
-          value=0.9,
-          step=0.1,
-          help="Restante será Verdadeiro/Falso"
-        )
-        
         # Botão de geração
         total_questions = len(selected_codes) * questions_per_code
         
@@ -183,8 +172,7 @@ def main():
           # Salvar configurações no session state
           st.session_state.generation_config = {
             'codes': selected_codes,
-            'questions_per_code': questions_per_code,
-            'multiple_choice_ratio': multiple_choice_ratio
+            'questions_per_code': questions_per_code
           }
           generate_questions_ui()
   
@@ -229,8 +217,7 @@ def generate_questions_ui():
       with st.spinner("Processando..."):
         batches = generate_questions(
           codes=config['codes'],
-          questions_per_code=config['questions_per_code'],
-          multiple_choice_ratio=config['multiple_choice_ratio']
+          questions_per_code=config['questions_per_code']
         )
       
       progress_bar.progress(100)
