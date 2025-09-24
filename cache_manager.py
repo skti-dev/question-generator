@@ -183,3 +183,37 @@ class CacheManager:
           continue
       
       return entries
+
+  def remove_by_key(self, cache_key: str) -> bool:
+    """Remove uma entrada específica do cache por chave"""
+    try:
+      with sqlite3.connect(self.db_path) as conn:
+        cursor = conn.execute("DELETE FROM question_cache WHERE cache_key = ?", (cache_key,))
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+      print(f"Erro ao remover entrada do cache: {e}")
+      return False
+
+  def remove_question_by_content(self, question_content: str) -> bool:
+    """Remove questão do cache baseado no conteúdo do enunciado"""
+    try:
+      with sqlite3.connect(self.db_path) as conn:
+        cursor = conn.execute("SELECT cache_key, question_data FROM question_cache")
+        keys_to_remove = []
+        for row in cursor.fetchall():
+          try:
+            question_data = json.loads(row[1])
+            if question_data.get("enunciado") == question_content:
+              keys_to_remove.append(row[0])
+          except:
+            continue
+        removed_count = 0
+        for key in keys_to_remove:
+          cursor = conn.execute("DELETE FROM question_cache WHERE cache_key = ?", (key,))
+          removed_count += cursor.rowcount
+        conn.commit()
+        return removed_count > 0
+    except Exception as e:
+      print(f"Erro ao remover questão por conteúdo: {e}")
+      return False
