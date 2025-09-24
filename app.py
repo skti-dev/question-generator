@@ -409,6 +409,7 @@ def display_questions_table(batches):
         "Código": batch.request.codigo,
         "Tipo": question.question_type.value.replace('_', ' ').title(),
         "Questão": question.enunciado[:80] + "..." if len(question.enunciado) > 80 else question.enunciado,
+        "Gabarito": question.gabarito,
         "Confiança": f"{confidence_icon} {validation.confidence_score:.2f}",
         "Motivo": validation.feedback[:50] + "..." if len(validation.feedback) > 50 else validation.feedback
       })
@@ -427,6 +428,7 @@ def display_questions_table(batches):
         "Dificuldade": st.column_config.TextColumn("Dificuldade", width=100),
         "Tipo": st.column_config.TextColumn("Tipo", width=120),
         "Questão": st.column_config.TextColumn("Questão", width=300),
+        "Gabarito": st.column_config.TextColumn("Gabarito", width=100),
         "Confiança": st.column_config.TextColumn("Confiança", width=100),
         "Motivo": st.column_config.TextColumn("Motivo", width=200)
       }
@@ -502,6 +504,7 @@ def display_cache_history():
           "Código": question.codigo,
           "Tipo": question.question_type.value.replace('_', ' ').title(),
           "Questão": question.enunciado[:100] + "..." if len(question.enunciado) > 100 else question.enunciado,
+          "Gabarito": question.gabarito,
           "Confiança": f"{confidence_icon} {confidence_score:.2f}",
           "Questão Completa": question.format_question()
         })
@@ -583,7 +586,8 @@ def display_cache_history():
               "Dificuldade": st.column_config.TextColumn("Dificuldade", width=100),
               "Tipo": st.column_config.TextColumn("Tipo", width=120),
               "Questão": st.column_config.TextColumn("Questão", width=300),
-              "Confiança": st.column_config.TextColumn("Confiança", width=100)
+              "Gabarito": st.column_config.TextColumn("Gabarito", width=100),
+              "Confiança": st.column_config.TextColumn("Confiança", width=100),
             }
           )
         else:
