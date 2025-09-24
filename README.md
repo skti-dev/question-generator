@@ -2,19 +2,37 @@
 
 Sistema inteligente para geração automática de questões educacionais baseadas nos códigos de habilidade da BNCC (Base Nacional Comum Curricular) para o 4º ano do ensino fundamental.
 
+- Autenticação
 <img width="1849" height="582" alt="image" src="https://github.com/user-attachments/assets/8589cfc9-66a7-4e37-bd96-cedf6c6727b2" />
-<img width="1740" height="867" alt="image" src="https://github.com/user-attachments/assets/664caa4b-1e7b-4d2b-96ff-9c7af126baa2" />
+
+- Tela inicial
+<img width="1852" height="817" alt="image" src="https://github.com/user-attachments/assets/6e82e7cc-7094-4fdf-b0dc-d3dab1960f0e" />
+
+- Gerando questões
 <img width="420" height="232" alt="image" src="https://github.com/user-attachments/assets/04d847e9-7b00-4967-9ac5-6e699780a157" />
+
+- Gerando questão novamente
 <img width="1340" height="559" alt="image" src="https://github.com/user-attachments/assets/e621c2d7-c275-4ab1-b000-d010f8662745" />
 <img width="324" height="49" alt="image" src="https://github.com/user-attachments/assets/f9eb9ccb-65ba-459d-822d-3b72d98449ab" />
 <img width="449" height="91" alt="image" src="https://github.com/user-attachments/assets/e3ddf017-6cf3-4d47-b551-c75797b1ac13" />
-<img width="1575" height="835" alt="image" src="https://github.com/user-attachments/assets/cb6535f1-d75f-40b9-b2cb-62a0a8761d5c" />
-<img width="1565" height="700" alt="image" src="https://github.com/user-attachments/assets/f4780910-88a4-4c82-90e4-bdd3480d1490" />
-<img width="1365" height="765" alt="image" src="https://github.com/user-attachments/assets/076b1e93-0f87-4580-83c8-ca7e53646d4d" />
-<img width="417" height="193" alt="image" src="https://github.com/user-attachments/assets/8e1d3c11-de34-4bc2-8108-45c197ec89a8" />
+
+- Análise detalhada das questões
+<img width="1537" height="753" alt="image" src="https://github.com/user-attachments/assets/05ae6d7e-4e5c-4791-86e1-48cf5550f93b" />
+
+- Questões atuais
+<img width="1600" height="826" alt="image" src="https://github.com/user-attachments/assets/16a3b8ad-748d-4857-8058-1c22d5e2d385" />
+
+- Questões em cache
+<img width="1501" height="764" alt="image" src="https://github.com/user-attachments/assets/0cd18575-269c-4270-8257-0ab6d27b9017" />
+
+- Limpar cache
+<img width="530" height="201" alt="image" src="https://github.com/user-attachments/assets/51e3ef3d-1002-479b-bb2b-eceaec2edf3f" />
+
+- Visualização LangSmith (aproximadamente 6 segundos para gerar 1 questão)
 <img width="988" height="90" alt="image" src="https://github.com/user-attachments/assets/fefdc7b8-63f1-4ef3-b154-0a7ff6d02249" />
-<img width="343" height="80" alt="image" src="https://github.com/user-attachments/assets/543f3c9d-0fbc-4cbf-9179-bb8dfc9dc0c9" />
-<img width="776" height="563" alt="image" src="https://github.com/user-attachments/assets/ef81d54f-0258-4e07-8de6-52b42babf78a" />
+
+- Arquivo JSON exportado
+<img width="332" height="89" alt="image" src="https://github.com/user-attachments/assets/55dad537-879f-4cdc-a0d2-c220daae99fd" />
 
 - **🔐 Sistema de autenticação** com senha protegida
 - **🎯 Validação inteligente** de alinhamento com códigos BNCC
@@ -23,7 +41,7 @@ Sistema inteligente para geração automática de questões educacionais baseada
 - ✅ **Alinhada com BNCC:** Estados físicos da matéria
 - 🎯 **Confiança:** 0.95/1.00
 - 📚 **Adequação cognitiva:** Linguagem adequada para 4º ano
-- 💡 **Feedback:** "Conceito fundamental bem aplicado"rsonalizável\*\* entre tipos de questão
+- 💡 **Feedback:** "Conceito fundamental bem aplicado entre tipos de questão
 - **💾 Sistema de cache** inteligente para evitar duplicatas
 - **🔄 Regeneração de questões** rejeitadas com variedade garantida
 - **🔍 Interface web** intuitiva com análise detalhada
