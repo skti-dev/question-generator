@@ -29,7 +29,6 @@ class CacheManager:
     """Gera chave única para cache baseada nos parâmetros da solicitação"""
     key_data = {
       "codigo": request.codigo,
-      "difficulty": request.difficulty.value,
       "question_type": request.question_type.value,
       "subject": request.subject.value,
       "content_hash": hashlib.md5(question_content.encode()).hexdigest()[:8]
@@ -39,10 +38,9 @@ class CacheManager:
   
   def get_cached_questions(self, request: QuestionRequest, limit: int = 10) -> List[CacheEntry]:
     """Busca questões em cache para a solicitação"""
-    # Busca por questões similares (mesmo código, dificuldade, tipo)
+    # Busca por questões similares (mesmo código, tipo)
     base_key_data = {
       "codigo": request.codigo,
-      "difficulty": request.difficulty.value,
       "question_type": request.question_type.value,
       "subject": request.subject.value
     }

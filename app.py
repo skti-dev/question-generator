@@ -12,7 +12,7 @@ load_dotenv()
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from pipeline import pipeline, get_subjects, get_codes_for_subject, generate_questions
-from models.schemas import DifficultyLevel, QuestionType
+from models.schemas import QuestionType
 
 # Configuração da página
 st.set_page_config(
@@ -152,16 +152,14 @@ def main():
             key="codes_select"
           )
         
-        # Configurações de dificuldade
-        st.subheader("🎯 Distribuição de Dificuldade")
+        # Configurações de quantidade
+        st.subheader("📊 Configurações de Geração")
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
-          easy_count = st.number_input("Fácil", min_value=0, max_value=10, value=1)
+          questions_per_code = st.number_input("Questões por Código", min_value=1, max_value=3, value=1)
         with col2:
-          medium_count = st.number_input("Médio", min_value=0, max_value=10, value=1)
-        with col3:
-          hard_count = st.number_input("Difícil", min_value=0, max_value=10, value=1)
+          pass  # Coluna vazia para espaçamento
         
         # Proporção de tipos de questão
         st.subheader("📝 Tipos de Questão")
@@ -175,7 +173,7 @@ def main():
         )
         
         # Botão de geração
-        total_questions = len(selected_codes) * (easy_count + medium_count + hard_count)
+        total_questions = len(selected_codes) * questions_per_code
         
         if st.button(
           f"🚀 Gerar {total_questions} Questões",
@@ -185,9 +183,7 @@ def main():
           # Salvar configurações no session state
           st.session_state.generation_config = {
             'codes': selected_codes,
-            'easy_count': easy_count,
-            'medium_count': medium_count,
-            'hard_count': hard_count,
+            'questions_per_code': questions_per_code,
             'multiple_choice_ratio': multiple_choice_ratio
           }
           generate_questions_ui()
@@ -233,9 +229,7 @@ def generate_questions_ui():
       with st.spinner("Processando..."):
         batches = generate_questions(
           codes=config['codes'],
-          easy_count=config['easy_count'],
-          medium_count=config['medium_count'],
-          hard_count=config['hard_count'],
+          questions_per_code=config['questions_per_code'],
           multiple_choice_ratio=config['multiple_choice_ratio']
         )
       
@@ -298,7 +292,7 @@ def display_results(batches):
               col1, col2 = st.columns([3, 1])
               
               with col1:
-                st.markdown(f"**❌ Questão Rejeitada {j+1}** - {question.difficulty.value.title()} - {question.question_type.value.replace('_', ' ').title()}")
+                st.markdown(f"**❌ Questão Rejeitada {j+1}** - {question.question_type.value.replace('_', ' ').title()}")
                 
                 # Botão para mostrar/ocultar questão completa
                 show_question_key = f"show_rejected_{batch.request.codigo}_{j}"
@@ -348,7 +342,7 @@ def display_results(batches):
             question = question_with_validation.question
             validation = question_with_validation.validation
             
-            st.markdown(f"### ✅ Questão Aprovada {j+1} - {question.difficulty.value.title()} - {question.question_type.value.replace('_', ' ').title()}")
+            st.markdown(f"### ✅ Questão Aprovada {j+1} - {question.question_type.value.replace('_', ' ').title()}")
             
             # Mostrar questão formatada
             st.markdown("**Questão:**")
@@ -426,7 +420,6 @@ def display_questions_table(batches):
       table_data.append({
         "Status": f"{status_icon} {status_text}",
         "Código": batch.request.codigo,
-        "Dificuldade": question.difficulty.value.title(),
         "Tipo": question.question_type.value.replace('_', ' ').title(),
         "Questão": question.enunciado[:80] + "..." if len(question.enunciado) > 80 else question.enunciado,
         "Confiança": f"{confidence_icon} {validation.confidence_score:.2f}",
@@ -520,7 +513,6 @@ def display_cache_history():
         cache_table_data.append({
           "Data": created_at.strftime("%d/%m/%Y %H:%M"),
           "Código": question.codigo,
-          "Dificuldade": question.difficulty.value.title(),
           "Tipo": question.question_type.value.replace('_', ' ').title(),
           "Questão": question.enunciado[:100] + "..." if len(question.enunciado) > 100 else question.enunciado,
           "Confiança": f"{confidence_icon} {confidence_score:.2f}",
@@ -632,7 +624,6 @@ def display_cache_history():
               
               export_data.append({
                 "codigo": entry.question.codigo,
-                "dificuldade": entry.question.difficulty.value,
                 "tipo": entry.question.question_type.value,
                 "data_criacao": created_at_str,
                 "questao": {

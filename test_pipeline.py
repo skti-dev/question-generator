@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
   from pipeline import pipeline, get_subjects, get_codes_for_subject
-  from models.schemas import DifficultyLevel, QuestionType
+  from models.schemas import QuestionType
   
   def test_basic_functionality():
     """Testa funcionalidades básicas da pipeline"""
@@ -47,14 +47,12 @@ try:
     print(f"   🧮 Testando com código: {test_code}")
     
     try:
-      # Gerar uma questão de múltipla escolha fácil
+      # Gerar uma questão de múltipla escolha
       from pipeline import generate_questions
       
       batches = generate_questions(
         codes=[test_code],
-        easy_count=1,
-        medium_count=0,
-        hard_count=0,
+        questions_per_code=1,
         multiple_choice_ratio=1.0
       )
       

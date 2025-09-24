@@ -3,7 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
-from models.schemas import Question, QuestionRequest, DifficultyLevel, QuestionType
+from models.schemas import Question, QuestionRequest, QuestionType
 
 # Configuração do modelo
 chat = ChatOpenAI(
@@ -33,10 +33,12 @@ multiple_choice_prompt = ChatPromptTemplate.from_messages([
   - Use textos apropriados para a idade (histórias, músicas, quadrinhos simples)
   - Foque em análise linguística, leitura e produção textual adequada ao nível
   
-  NÍVEIS DE DIFICULDADE:
-  - FÁCIL: Reconhecimento direto, identificação básica
-  - MÉDIO: Interpretação simples, aplicação de regras básicas
-  - DIFÍCIL: Análise textual, inferências simples (mas ainda adequado ao 4º ano)
+  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
+  a questão deve ser adequada para essa faixa etária em termos de:
+  - Vocabulário apropriado para a idade
+  - Textos adequados (histórias, músicas, quadrinhos simples)
+  - Conceitos linguísticos acessíveis ao desenvolvimento cognitivo
+  - Contextualização familiar às crianças
   
   CAMPOS DE ATUAÇÃO (conforme BNCC):
   - Todos os campos de atuação
@@ -51,7 +53,6 @@ multiple_choice_prompt = ChatPromptTemplate.from_messages([
   CÓDIGO DA HABILIDADE: {codigo}
   OBJETO DE CONHECIMENTO: {objeto_conhecimento}
   UNIDADE TEMÁTICA: {unidade_tematica}
-  NÍVEL DE DIFICULDADE: {difficulty}
   
   A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
 ])
@@ -69,10 +70,12 @@ true_false_prompt = ChatPromptTemplate.from_messages([
   - Evite afirmações ambíguas
   - Use exemplos concretos e familiares
   
-  NÍVEIS DE DIFICULDADE:
-  - FÁCIL: Afirmações diretas sobre conceitos básicos
-  - MÉDIO: Afirmações que exigem aplicação de regras
-  - DIFÍCIL: Afirmações que exigem análise textual (mas ainda adequado ao 4º ano)
+  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
+  a questão deve ser adequada para essa faixa etária em termos de:
+  - Vocabulário apropriado para a idade
+  - Afirmações claras sobre regras gramaticais, interpretação textual ou análise linguística
+  - Exemplos concretos e familiares às crianças
+  - Conceitos linguísticos adequados ao desenvolvimento cognitivo
   
   IMPORTANTE: O gabarito deve ser EXATAMENTE "Verdadeiro" ou "Falso"."""),
   
@@ -81,7 +84,6 @@ true_false_prompt = ChatPromptTemplate.from_messages([
   CÓDIGO DA HABILIDADE: {codigo}
   OBJETO DE CONHECIMENTO: {objeto_conhecimento}
   UNIDADE TEMÁTICA: {unidade_tematica}
-  NÍVEL DE DIFICULDADE: {difficulty}
   
   A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
 ])
@@ -97,8 +99,7 @@ def create_portuguese_question(request: QuestionRequest) -> Question:
   prompt_data = {
     "codigo": request.codigo,
     "objeto_conhecimento": request.objeto_conhecimento,
-    "unidade_tematica": request.unidade_tematica,
-    "difficulty": request.difficulty.value.upper()
+    "unidade_tematica": request.unidade_tematica
   }
   
   # Escolher chain baseado no tipo de questão
@@ -115,7 +116,6 @@ def create_portuguese_question(request: QuestionRequest) -> Question:
     enunciado=chain_output.enunciado,
     opcoes=opcoes,
     gabarito=chain_output.gabarito,
-    difficulty=request.difficulty,
     question_type=request.question_type
   )
   

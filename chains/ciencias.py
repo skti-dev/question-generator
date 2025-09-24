@@ -3,7 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
-from models.schemas import Question, QuestionRequest, DifficultyLevel, QuestionType
+from models.schemas import Question, QuestionRequest, QuestionType
 
 # Configuração do modelo
 chat = ChatOpenAI(
@@ -34,10 +34,12 @@ multiple_choice_prompt = ChatPromptTemplate.from_messages([
   - Estimule a curiosidade científica e o pensamento investigativo
   - Evite conceitos muito abstratos ou que exijam conhecimentos avançados
   
-  NÍVEIS DE DIFICULDADE:
-  - FÁCIL: Observação direta, identificação básica de fenômenos
-  - MÉDIO: Relações de causa e efeito simples, classificações
-  - DIFÍCIL: Análise de experimentos simples, comparações (mas ainda adequado ao 4º ano)
+  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
+  a questão deve ser adequada para essa faixa etária em termos de:
+  - Vocabulário científico acessível
+  - Conceitos adequados ao desenvolvimento cognitivo  
+  - Fenômenos observáveis e próximos da realidade da criança
+  - Contextualização com experiências cotidianas
   
   UNIDADES TEMÁTICAS (conforme BNCC):
   - Matéria e energia
@@ -51,7 +53,6 @@ multiple_choice_prompt = ChatPromptTemplate.from_messages([
   CÓDIGO DA HABILIDADE: {codigo}
   OBJETO DE CONHECIMENTO: {objeto_conhecimento}
   UNIDADE TEMÁTICA: {unidade_tematica}
-  NÍVEL DE DIFICULDADE: {difficulty}
   
   A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
 ])
@@ -70,10 +71,12 @@ true_false_prompt = ChatPromptTemplate.from_messages([
   - Use exemplos concretos da natureza e do cotidiano
   - Evite afirmações que dependam de contexto específico
   
-  NÍVEIS DE DIFICULDADE:
-  - FÁCIL: Afirmações sobre observações diretas
-  - MÉDIO: Afirmações sobre relações científicas básicas
-  - DIFÍCIL: Afirmações que exigem análise científica simples (mas ainda adequado ao 4º ano)
+  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
+  a questão deve ser adequada para essa faixa etária em termos de:
+  - Vocabulário científico acessível
+  - Afirmações claras sobre fenômenos científicos observáveis
+  - Exemplos concretos da natureza e do cotidiano
+  - Conceitos adequados ao desenvolvimento cognitivo
   
   IMPORTANTE: O gabarito deve ser EXATAMENTE "Verdadeiro" ou "Falso"."""),
   
@@ -82,7 +85,6 @@ true_false_prompt = ChatPromptTemplate.from_messages([
   CÓDIGO DA HABILIDADE: {codigo}
   OBJETO DE CONHECIMENTO: {objeto_conhecimento}
   UNIDADE TEMÁTICA: {unidade_tematica}
-  NÍVEL DE DIFICULDADE: {difficulty}
   
   A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
 ])
@@ -98,8 +100,7 @@ def create_science_question(request: QuestionRequest) -> Question:
   prompt_data = {
     "codigo": request.codigo,
     "objeto_conhecimento": request.objeto_conhecimento,
-    "unidade_tematica": request.unidade_tematica,
-    "difficulty": request.difficulty.value.upper()
+    "unidade_tematica": request.unidade_tematica
   }
   
   # Escolher chain baseado no tipo de questão
@@ -116,7 +117,6 @@ def create_science_question(request: QuestionRequest) -> Question:
     enunciado=chain_output.enunciado,
     opcoes=opcoes,
     gabarito=chain_output.gabarito,
-    difficulty=request.difficulty,
     question_type=request.question_type
   )
   

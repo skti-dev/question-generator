@@ -1,6 +1,20 @@
 # 📚 Gerador de Questões BNCC - 4º Ano
 
-Sistema inteligente para geração automática de questões educacionais baseadas nos códigos de habilidade da BNCC (Base Nacional Comum Curricular) para o 4º ano do ensino fundamental.
+Sistema int- **🤖 Geração automática** de questões múltipla escolha e verdadeiro/falso
+
+- **🔐 Sistema de autenticação** com senha protegida
+- **🎯 Validação inteligente** de alinhamento com códigos BNCC
+- **🔄 Propo**Validação Automática:\*\*
+
+- ✅ **Alinhada com BNCC:** Estados físicos da matéria
+- 🎯 **Confiança:** 0.95/1.00
+- 📚 **Adequação cognitiva:** Linguagem adequada para 4º ano
+- 💡 **Feedback:** "Conceito fundamental bem aplicado"rsonalizável\*\* entre tipos de questão
+- **💾 Sistema de cache** inteligente para evitar duplicatas
+- **🔄 Regeneração de questões** rejeitadas com variedade garantida
+- **🔍 Interface web** intuitiva com análise detalhada
+- **📤 Exportação completa** para JSON com histórico
+- **📈 Estatísticas em tempo real** de aprovação e desempenhopara geração automática de questões educacionais baseadas nos códigos de habilidade da BNCC (Base Nacional Comum Curricular) para o 4º ano do ensino fundamental.
 
 ## 🎯 Objetivo do Projeto
 
@@ -155,9 +169,7 @@ from pipeline import generate_questions
 # Gerar questões para códigos específicos
 batches = generate_questions(
     codes=["EF04MA01", "EF04CI01", "EF04LP01"],
-    easy_count=2,      # 2 questões fáceis por código
-    medium_count=1,    # 1 questão média por código
-    hard_count=1,      # 1 questão difícil por código
+    questions_per_code=3,  # 3 questões por código
     multiple_choice_ratio=0.8  # 80% múltipla escolha, 20% V/F
 )
 
@@ -237,7 +249,6 @@ Gabarito: A) 1.681
 - ✅ **Alinhada com BNCC:** Números e operações - sequências
 - 🎯 **Confiança:** 0.92/1.00
 - 📚 **Adequação cognitiva:** Apropriada para 4º ano
-- 🎓 **Dificuldade:** Média
 - 💡 **Feedback:** "Questão bem estruturada, explora padrões numéricos"
 
 ### Ciências - EF04CI02
@@ -266,7 +277,7 @@ Gabarito: B) Ela congela e vira gelo
 ### Cache
 
 - **Localização:** `db/questions_cache.db`
-- **Chave:** código + dificuldade + tipo + hash do conteúdo
+- **Chave:** código + tipo + hash do conteúdo
 - **Limpeza:** Automática após 30 dias
 
 ### Validação
@@ -318,7 +329,7 @@ rm db/questions_cache.db
 ### 🗄️ Sistema de Cache
 
 - **Localização:** `db/questions_cache.db`
-- **Chave única:** código + dificuldade + tipo + hash do conteúdo
+- **Chave única:** código + tipo + hash do conteúdo
 - **Limpeza automática:** Questões antigas (30+ dias)
 - **Duplicatas:** Detecção automática por similaridade textual
 

@@ -65,7 +65,6 @@ validation_prompt = ChatPromptTemplate.from_messages([
   Objeto de Conhecimento: {objeto_conhecimento}
   Unidade Temática: {unidade_tematica}
   Matéria: {subject}
-  Nível de Dificuldade: {difficulty}
   
   === QUESTÃO GERADA ===
   Enunciado: {enunciado}
@@ -88,7 +87,6 @@ def validate_question(question: Question, request: QuestionRequest) -> Validatio
     "objeto_conhecimento": request.objeto_conhecimento,
     "unidade_tematica": request.unidade_tematica,
     "subject": request.subject.value,
-    "difficulty": request.difficulty.value,
     "enunciado": question.enunciado,
     "opcoes": question.opcoes if question.opcoes else "N/A (Verdadeiro/Falso)",
     "gabarito": question.gabarito,

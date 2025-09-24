@@ -2,11 +2,6 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 from enum import Enum
 
-class DifficultyLevel(str, Enum):
-  EASY = "facil"
-  MEDIUM = "medio"
-  HARD = "dificil"
-
 class QuestionType(str, Enum):
   MULTIPLE_CHOICE = "multipla_escolha"
   TRUE_FALSE = "verdadeiro_falso"
@@ -21,7 +16,6 @@ class QuestionRequest(BaseModel):
   objeto_conhecimento: str = Field(description="Descrição do objeto de conhecimento")
   unidade_tematica: str = Field(description="Unidade temática/campo")
   subject: Subject = Field(description="Matéria da questão")
-  difficulty: DifficultyLevel = Field(description="Nível de dificuldade")
   question_type: QuestionType = Field(description="Tipo de questão")
   quantity: int = Field(default=1, ge=1, le=20, description="Quantidade de questões")
 
@@ -30,7 +24,6 @@ class Question(BaseModel):
   enunciado: str = Field(description="Enunciado da questão")
   opcoes: Optional[List[str]] = Field(default=None, description="Opções para múltipla escolha")
   gabarito: str = Field(description="Resposta correta")
-  difficulty: DifficultyLevel = Field(description="Nível de dificuldade")
   question_type: QuestionType = Field(description="Tipo de questão")
   
   def format_question(self) -> str:
@@ -70,7 +63,6 @@ class QuestionBatch(BaseModel):
           "enunciado": q.question.enunciado,
           "opcoes": q.question.opcoes,
           "gabarito": q.question.gabarito,
-          "dificuldade": q.question.difficulty.value,
           "tipo": q.question.question_type.value,
           "validacao": {
             "alinhada": q.validation.is_aligned,

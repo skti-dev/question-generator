@@ -4,7 +4,7 @@ from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import os
-from models.schemas import Question, QuestionRequest, DifficultyLevel, QuestionType
+from models.schemas import Question, QuestionRequest, QuestionType
 
 # Configuração do modelo
 chat = ChatOpenAI(
@@ -34,10 +34,12 @@ multiple_choice_prompt = ChatPromptTemplate.from_messages([
   - Use contextos do cotidiano da criança (escola, casa, brincadeiras)
   - Evite cálculos muito complexos
   
-  NÍVEIS DE DIFICULDADE:
-  - FÁCIL: Conceitos básicos, operações simples, reconhecimento direto
-  - MÉDIO: Aplicação de conceitos, pequenos problemas contextualizados
-  - DIFÍCIL: Análise, comparação, problemas com múltiplas etapas (mas ainda adequado ao 4º ano)
+  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
+  a questão deve ser adequada para essa faixa etária em termos de:
+  - Vocabulário acessível e contextualizado
+  - Conceitos apropriados para o desenvolvimento cognitivo
+  - Situações do cotidiano das crianças (escola, casa, brincadeiras)
+  - Operações e números adequados ao nível de aprendizagem
   
   IMPORTANTE: Retorne APENAS UMA questão por vez, bem elaborada e revisada."""),
   
@@ -46,7 +48,6 @@ multiple_choice_prompt = ChatPromptTemplate.from_messages([
   CÓDIGO DA HABILIDADE: {codigo}
   OBJETO DE CONHECIMENTO: {objeto_conhecimento}
   UNIDADE TEMÁTICA: {unidade_tematica}
-  NÍVEL DE DIFICULDADE: {difficulty}
   
   A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
 ])
@@ -64,10 +65,12 @@ true_false_prompt = ChatPromptTemplate.from_messages([
   - Evite afirmações ambíguas ou que dependam de interpretação
   - Use contextos familiares às crianças
   
-  NÍVEIS DE DIFICULDADE:
-  - FÁCIL: Afirmações diretas sobre conceitos básicos
-  - MÉDIO: Afirmações que exigem aplicação de conceitos
-  - DIFÍCIL: Afirmações que exigem análise ou comparação (mas ainda adequado ao 4º ano)
+  IMPORTANTE: Como estamos trabalhando com 4º ano do ensino fundamental (crianças de 9-10 anos),
+  a questão deve ser adequada para essa faixa etária em termos de:
+  - Vocabulário acessível e contextualizado
+  - Afirmações claras que permitam resposta definitiva (V ou F)
+  - Situações familiares às crianças
+  - Conceitos apropriados para o desenvolvimento cognitivo
   
   IMPORTANTE: O gabarito deve ser EXATAMENTE "Verdadeiro" ou "Falso"."""),
   
@@ -76,7 +79,6 @@ true_false_prompt = ChatPromptTemplate.from_messages([
   CÓDIGO DA HABILIDADE: {codigo}
   OBJETO DE CONHECIMENTO: {objeto_conhecimento}
   UNIDADE TEMÁTICA: {unidade_tematica}
-  NÍVEL DE DIFICULDADE: {difficulty}
   
   A questão deve ser adequada para alunos do 4º ano e seguir exatamente o código de habilidade especificado.""")
 ])
@@ -92,8 +94,7 @@ def create_math_question(request: QuestionRequest) -> Question:
   prompt_data = {
     "codigo": request.codigo,
     "objeto_conhecimento": request.objeto_conhecimento,
-    "unidade_tematica": request.unidade_tematica,
-    "difficulty": request.difficulty.value.upper()
+    "unidade_tematica": request.unidade_tematica
   }
   
   # Escolher chain baseado no tipo de questão
@@ -110,7 +111,6 @@ def create_math_question(request: QuestionRequest) -> Question:
     enunciado=chain_output.enunciado,
     opcoes=opcoes,
     gabarito=chain_output.gabarito,
-    difficulty=request.difficulty,
     question_type=request.question_type
   )
   

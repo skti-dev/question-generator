@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from models.schemas import (
   QuestionRequest, Question, QuestionBatch, 
-  QuestionWithValidation, Subject, DifficultyLevel, QuestionType, ValidationResult
+  QuestionWithValidation, Subject, QuestionType, ValidationResult
 )
 from chains.matematica import math_chain
 from chains.portugues import portuguese_chain
@@ -137,7 +137,6 @@ class QuestionGeneratorPipeline:
             enunciado="Erro na geração da questão",
             opcoes=None,
             gabarito="N/A",
-            difficulty=request.difficulty,
             question_type=request.question_type
           )
           
@@ -194,7 +193,6 @@ class QuestionGeneratorPipeline:
         enunciado="Erro na regeneração da questão",
         opcoes=None,
         gabarito="N/A",
-        difficulty=request.difficulty,
         question_type=request.question_type
       )
       
@@ -203,8 +201,8 @@ class QuestionGeneratorPipeline:
   def generate_questions_batch(
     self, 
     code: str, 
-    difficulties: List[DifficultyLevel],
     question_types: List[QuestionType],
+    quantity: int = 3,
     use_cache: bool = True
   ) -> QuestionBatch:
     """Gera um lote de questões para um código de habilidade"""
@@ -217,18 +215,17 @@ class QuestionGeneratorPipeline:
     # Determinar matéria
     subject = Subject(skill_info["subject"])
     
-    # Gerar questões para cada combinação de dificuldade e tipo
+    # Gerar questões para cada tipo
     questions_with_validation = []
     total_generated = 0
     
-    for difficulty in difficulties:
-      for question_type in question_types:
+    for question_type in question_types:
+      for _ in range(quantity):
         request = QuestionRequest(
           codigo=code,
           objeto_conhecimento=skill_info["objeto_conhecimento"],
           unidade_tematica=skill_info["unidade_tematica"],
           subject=subject,
-          difficulty=difficulty,
           question_type=question_type,
           quantity=1
         )
@@ -250,7 +247,6 @@ class QuestionGeneratorPipeline:
         objeto_conhecimento=skill_info["objeto_conhecimento"],
         unidade_tematica=skill_info["unidade_tematica"],
         subject=subject,
-        difficulty=difficulties[0] if difficulties else DifficultyLevel.MEDIUM,
         question_type=question_types[0] if question_types else QuestionType.MULTIPLE_CHOICE,
         quantity=total_generated
       ),
@@ -264,9 +260,7 @@ class QuestionGeneratorPipeline:
   def generate_custom_distribution(
     self,
     codes: List[str],
-    easy_count: int = 1,
-    medium_count: int = 1,
-    hard_count: int = 1,
+    questions_per_code: int = 3,
     multiple_choice_ratio: float = 0.7,
     use_cache: bool = True
   ) -> List[QuestionBatch]:
@@ -276,22 +270,8 @@ class QuestionGeneratorPipeline:
     
     for code in codes:
       # Calcular distribuição de tipos
-      total_per_code = easy_count + medium_count + hard_count
-      mc_count = int(total_per_code * multiple_choice_ratio)
-      tf_count = total_per_code - mc_count
-      
-      # Criar listas de dificuldades na ordem desejada
-      difficulties_ordered = []
-      for _ in range(easy_count):
-        difficulties_ordered.append(DifficultyLevel.EASY)
-      for _ in range(medium_count):
-        difficulties_ordered.append(DifficultyLevel.MEDIUM)
-      for _ in range(hard_count):
-        difficulties_ordered.append(DifficultyLevel.HARD)
-      
-      # Embaralhar para distribuição aleatória
-      import random
-      random.shuffle(difficulties_ordered)
+      mc_count = int(questions_per_code * multiple_choice_ratio)
+      tf_count = questions_per_code - mc_count
       
       # Criar lista de tipos: primeiro múltipla escolha, depois verdadeiro/falso
       question_types_ordered = []
@@ -300,19 +280,15 @@ class QuestionGeneratorPipeline:
       for _ in range(tf_count):
         question_types_ordered.append(QuestionType.TRUE_FALSE)
       
-      # Embaralhar os tipos também
+      # Embaralhar os tipos
+      import random
       random.shuffle(question_types_ordered)
-      
-      # Combinar dificuldades e tipos
-      difficulties = difficulties_ordered
-      question_types = question_types_ordered
-      
       
       # Gerar batch para este código
       batch = self.generate_questions_batch(
         code=code,
-        difficulties=difficulties,
-        question_types=question_types,
+        question_types=question_types_ordered,
+        quantity=1,  # Cada tipo será gerado uma vez
         use_cache=use_cache
       )
       
@@ -355,16 +331,12 @@ def get_codes_for_subject(subject: str) -> List[Dict[str, str]]:
 
 def generate_questions(
   codes: List[str],
-  easy_count: int = 1,
-  medium_count: int = 1, 
-  hard_count: int = 1,
+  questions_per_code: int = 3, 
   multiple_choice_ratio: float = 0.7
 ) -> List[QuestionBatch]:
   """Função principal para gerar questões"""
   return pipeline.generate_custom_distribution(
     codes=codes,
-    easy_count=easy_count,
-    medium_count=medium_count,
-    hard_count=hard_count,
+    questions_per_code=questions_per_code,
     multiple_choice_ratio=multiple_choice_ratio
   )
