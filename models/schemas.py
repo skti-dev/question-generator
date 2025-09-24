@@ -27,7 +27,18 @@ class Question(BaseModel):
   
   def format_question(self) -> str:
     """Formata a questão no padrão solicitado - sempre múltipla escolha"""
-    opcoes_text = "\n".join([f"{chr(65+i)}) {opcao}" for i, opcao in enumerate(self.opcoes)])
+    # Remover prefixos A), B), C), D) das opções se já existirem
+    opcoes_limpas = []
+    for opcao in self.opcoes:
+      # Verificar se a opção já tem prefixo A), B), C), ou D)
+      if opcao.startswith(('A) ', 'B) ', 'C) ', 'D) ')):
+        # Remover o prefixo existente
+        opcoes_limpas.append(opcao[3:])
+      else:
+        opcoes_limpas.append(opcao)
+    
+    # Adicionar os prefixos corretos
+    opcoes_text = "\n".join([f"{chr(65+i)}) {opcao}" for i, opcao in enumerate(opcoes_limpas)])
     return f"[{self.codigo}] QUESTÃO: {self.enunciado}\n{opcoes_text}\n\nGabarito: {self.gabarito}"
 
 class ValidationResult(BaseModel):

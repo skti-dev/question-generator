@@ -165,7 +165,7 @@ def main():
         total_questions = len(selected_codes) * questions_per_code
         
         if st.button(
-          f"🚀 Gerar {total_questions} Questões",
+          f"🚀 Gerar {total_questions} questões",
           disabled=len(selected_codes) == 0 or total_questions == 0,
           type="primary"
         ):
@@ -425,7 +425,6 @@ def display_questions_table(batches):
       column_config={
         "Status": st.column_config.TextColumn("Status", width=100),
         "Código": st.column_config.TextColumn("Código", width=100),
-        "Dificuldade": st.column_config.TextColumn("Dificuldade", width=100),
         "Tipo": st.column_config.TextColumn("Tipo", width=120),
         "Questão": st.column_config.TextColumn("Questão", width=300),
         "Gabarito": st.column_config.TextColumn("Gabarito", width=100),
@@ -570,7 +569,7 @@ def display_cache_history():
         df_cache = pd.DataFrame(cache_table_data)
         
         # Verificar se todas as colunas necessárias existem
-        required_columns = ["Data", "Código", "Dificuldade", "Tipo", "Questão", "Confiança"]
+        required_columns = ["Data", "Código", "Tipo", "Questão", "Gabarito", "Confiança"]
         available_columns = [col for col in required_columns if col in df_cache.columns]
         
         if available_columns:
@@ -583,7 +582,6 @@ def display_cache_history():
             column_config={
               "Data": st.column_config.TextColumn("Data", width=120),
               "Código": st.column_config.TextColumn("Código", width=100),
-              "Dificuldade": st.column_config.TextColumn("Dificuldade", width=100),
               "Tipo": st.column_config.TextColumn("Tipo", width=120),
               "Questão": st.column_config.TextColumn("Questão", width=300),
               "Gabarito": st.column_config.TextColumn("Gabarito", width=100),

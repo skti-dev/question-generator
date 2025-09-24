@@ -157,7 +157,7 @@ class CacheManager:
     """Retorna todas as entradas do cache"""
     with sqlite3.connect(self.db_path) as conn:
       cursor = conn.execute("""
-        SELECT cache_key, question_data, validation_data, created_at 
+        SELECT cache_key, question_data, validation_data, created_at
         FROM question_cache 
         ORDER BY created_at DESC
       """)
