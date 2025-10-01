@@ -3,27 +3,28 @@
 Sistema inteligente para geração automática de questões educacionais baseadas nos códigos de habilidade da BNCC (Base Nacional Comum Curricular) para o 4º ano do ensino fundamental.
 
 - Autenticação
-  `<img width="1849" height="582" alt="image" src="https://github.com/user-attachments/assets/8589cfc9-66a7-4e37-bd96-cedf6c6727b2" />`
+<img width="1849" height="582" alt="image" src="https://github.com/user-attachments/assets/8589cfc9-66a7-4e37-bd96-cedf6c6727b2" />
 - Tela inicial
-  `<img width="1852" height="817" alt="image" src="https://github.com/user-attachments/assets/6e82e7cc-7094-4fdf-b0dc-d3dab1960f0e" />`
+<img width="1852" height="817" alt="image" src="https://github.com/user-attachments/assets/6e82e7cc-7094-4fdf-b0dc-d3dab1960f0e" />
 - Gerando questões
-  `<img width="420" height="232" alt="image" src="https://github.com/user-attachments/assets/04d847e9-7b00-4967-9ac5-6e699780a157" />`
+<img width="420" height="232" alt="image" src="https://github.com/user-attachments/assets/04d847e9-7b00-4967-9ac5-6e699780a157" />
 - Gerando questão novamente
-  `<img width="1340" height="559" alt="image" src="https://github.com/user-attachments/assets/e621c2d7-c275-4ab1-b000-d010f8662745" />`
-  `<img width="324" height="49" alt="image" src="https://github.com/user-attachments/assets/f9eb9ccb-65ba-459d-822d-3b72d98449ab" />`
-  `<img width="449" height="91" alt="image" src="https://github.com/user-attachments/assets/e3ddf017-6cf3-4d47-b551-c75797b1ac13" />`
+<img width="1340" height="559" alt="image" src="https://github.com/user-attachments/assets/e621c2d7-c275-4ab1-b000-d010f8662745" />
+<img width="324" height="49" alt="image" src="https://github.com/user-attachments/assets/f9eb9ccb-65ba-459d-822d-3b72d98449ab" />
+<img width="449" height="91" alt="image" src="https://github.com/user-attachments/assets/e3ddf017-6cf3-4d47-b551-c75797b1ac13" />
 - Análise detalhada das questões
-  `<img width="1537" height="753" alt="image" src="https://github.com/user-attachments/assets/05ae6d7e-4e5c-4791-86e1-48cf5550f93b" />`
+<img width="1537" height="753" alt="image" src="https://github.com/user-attachments/assets/05ae6d7e-4e5c-4791-86e1-48cf5550f93b" />
 - Questões atuais
-  `<img width="1600" height="826" alt="image" src="https://github.com/user-attachments/assets/16a3b8ad-748d-4857-8058-1c22d5e2d385" />`
+<img width="1600" height="826" alt="image" src="https://github.com/user-attachments/assets/16a3b8ad-748d-4857-8058-1c22d5e2d385" />
 - Questões em cache
-  `<img width="1501" height="764" alt="image" src="https://github.com/user-attachments/assets/0cd18575-269c-4270-8257-0ab6d27b9017" />`
+<img width="1501" height="764" alt="image" src="https://github.com/user-attachments/assets/0cd18575-269c-4270-8257-0ab6d27b9017" />
 - Limpar cache
-  `<img width="530" height="201" alt="image" src="https://github.com/user-attachments/assets/51e3ef3d-1002-479b-bb2b-eceaec2edf3f" />`
+<img width="530" height="201" alt="image" src="https://github.com/user-attachments/assets/51e3ef3d-1002-479b-bb2b-eceaec2edf3f" />
 - Visualização LangSmith (aproximadamente 6 segundos para gerar 1 questão)
-  `<img width="988" height="90" alt="image" src="https://github.com/user-attachments/assets/fefdc7b8-63f1-4ef3-b154-0a7ff6d02249" />`
+<img width="988" height="90" alt="image" src="https://github.com/user-attachments/assets/fefdc7b8-63f1-4ef3-b154-0a7ff6d02249" />
 - Arquivo JSON exportado
-  `<img width="332" height="89" alt="image" src="https://github.com/user-attachments/assets/55dad537-879f-4cdc-a0d2-c220daae99fd" />`
+<img width="332" height="89" alt="image" src="https://github.com/user-attachments/assets/55dad537-879f-4cdc-a0d2-c220daae99fd" />
+
 - **🔐 Sistema de autenticação** com senha protegida
 - **🎯 Validação inteligente** de alinhamento com códigos BNCC
 - **🔄 Propo**Validação Automática:\*\*
