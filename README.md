@@ -513,8 +513,7 @@ python -c "from pipeline import pipeline; pipeline.cache_manager.clear_cache(old
 
 **👥 Desenvolvido por:**
 
-- Equipe SKTI Development
-- Com contribuições da comunidade educacional
+- Augusto Seabra
 
 **🙏 Agradecimentos:**
 
