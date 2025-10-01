@@ -4,34 +4,42 @@ Sistema inteligente para geração automática de questões educacionais baseada
 
 - Autenticação
 <img width="1849" height="582" alt="image" src="https://github.com/user-attachments/assets/8589cfc9-66a7-4e37-bd96-cedf6c6727b2" />
+
 - Tela inicial
 <img width="1852" height="817" alt="image" src="https://github.com/user-attachments/assets/6e82e7cc-7094-4fdf-b0dc-d3dab1960f0e" />
+
 - Gerando questões
 <img width="420" height="232" alt="image" src="https://github.com/user-attachments/assets/04d847e9-7b00-4967-9ac5-6e699780a157" />
+
 - Gerando questão novamente
 <img width="1340" height="559" alt="image" src="https://github.com/user-attachments/assets/e621c2d7-c275-4ab1-b000-d010f8662745" />
 <img width="324" height="49" alt="image" src="https://github.com/user-attachments/assets/f9eb9ccb-65ba-459d-822d-3b72d98449ab" />
 <img width="449" height="91" alt="image" src="https://github.com/user-attachments/assets/e3ddf017-6cf3-4d47-b551-c75797b1ac13" />
+
 - Análise detalhada das questões
 <img width="1537" height="753" alt="image" src="https://github.com/user-attachments/assets/05ae6d7e-4e5c-4791-86e1-48cf5550f93b" />
+
 - Questões atuais
 <img width="1600" height="826" alt="image" src="https://github.com/user-attachments/assets/16a3b8ad-748d-4857-8058-1c22d5e2d385" />
+
 - Questões em cache
 <img width="1501" height="764" alt="image" src="https://github.com/user-attachments/assets/0cd18575-269c-4270-8257-0ab6d27b9017" />
+
 - Limpar cache
 <img width="530" height="201" alt="image" src="https://github.com/user-attachments/assets/51e3ef3d-1002-479b-bb2b-eceaec2edf3f" />
+
 - Visualização LangSmith (aproximadamente 6 segundos para gerar 1 questão)
 <img width="988" height="90" alt="image" src="https://github.com/user-attachments/assets/fefdc7b8-63f1-4ef3-b154-0a7ff6d02249" />
+
 - Arquivo JSON exportado
 <img width="332" height="89" alt="image" src="https://github.com/user-attachments/assets/55dad537-879f-4cdc-a0d2-c220daae99fd" />
 
 - **🔐 Sistema de autenticação** com senha protegida
 - **🎯 Validação inteligente** de alinhamento com códigos BNCC
-- **🔄 Propo**Validação Automática:\*\*
+- **🔄 Validação Automática:** LLM adicional para validar as questões geradas individualmente
 - ✅ **Alinhada com BNCC:** Estados físicos da matéria
 - 🎯 **Confiança:** 0.95/1.00
 - 📚 **Adequação cognitiva:** Linguagem adequada para 4º ano
-- 💡 **Feedback:** "Conceito fundamental bem aplicado entre tipos de questão
 - **💾 Sistema de cache** inteligente para evitar duplicatas
 - **🔄 Regeneração de questões** rejeitadas com variedade garantida
 - **🔍 Interface web** intuitiva com análise detalhada
@@ -57,32 +65,34 @@ question_generator/
 ├── 📱 app.py                     # Interface Streamlit (aplicação principal)
 ├── 🧪 pipeline.py                # Pipeline de geração e orquestração
 ├── 🧪 cache_manager.py           # Sistema de cache SQLite
-│
+├── 🧩 ui/                        # Componentes de UI (Streamlit)
+│   ├── actions.py               # Funções de ação (export, delete, seleção)
+│   ├── cache_panel.py           # Painel do Histórico / Cache
+│   ├── config_panel.py          # Painel de configurações (seleção de códigos/matéria)
+│   ├── questions_table.py       # Renderização da tabela de questões atuais
+│   └── results_panel.py         # Painel de resultados e ações globais
+├── 🧩 utils/                     # Utilitários e helpers
+│   └── export.py                # Centraliza formato de exportação JSON
 ├── 📁 chains/                    # Especialistas por matéria (LangChain)
-│   ├── matematica.py             # Professor especialista em matemática
-│   ├── portugues.py              # Professor especialista em português
-│   ├── ciencias.py               # Professor especialista em ciências
-│   └── validator.py              # Validador de questões BNCC
-│
+│   ├── matematica.py
+│   ├── portugues.py
+│   ├── ciencias.py
+│   └── validator.py
 ├── 📁 models/                    # Modelos de dados e esquemas
-│   └── schemas.py                # Estruturas Pydantic (Question, Validation, etc.)
-│
+│   └── schemas.py
 ├── 📁 data/                      # Base de dados BNCC
-│   ├── BNCC_4ano_Mapeamento.xlsx # Planilha original dos códigos
-│   └── BNCC_4ano_Mapeamento.json # JSON processado para o sistema
-│
+│   ├── BNCC_4ano_Mapeamento.xlsx
+│   └── BNCC_4ano_Mapeamento.json
 ├── 📁 scripts/                   # Utilitários e ferramentas
-│   ├── extract_from_mapping.py   # Processa planilha BNCC → JSON
-│   └── scraping_codigo_habilidades.py # Coleta códigos de outras séries
-│
+│   ├── extract_from_mapping.py
+│   └── scraping_codigo_habilidades.py
 ├── 📁 db/                        # Banco de dados local
-│   └── questions_cache.db        # Cache SQLite das questões
-│
-├── 🧪 test_pipeline.py           # Testes automatizados
-├── 🧪 test_logic.py              # Testes de lógica de negócio
-├── 📋 requirements.txt           # Dependências Python
-├── 🔐 .env                       # Variáveis de ambiente (chaves API, senha)
-└── 📖 README.md                  # Documentação do projeto
+│   └── questions_cache.db
+├── 🧪 test_pipeline.py
+├── 🧪 test_logic.py
+├── 📋 requirements.txt
+├── 🔐 .env
+└── 📖 README.md
 ```
 
 ## 🎯 Funcionalidades
@@ -90,11 +100,10 @@ question_generator/
 - **🤖 Geração automática** de questões múltipla escolha
 - **🔐 Sistema de autenticação** com senha protegida
 - **🎯 Validação inteligente** de alinhamento com códigos BNCC
-- **� Distribuição personalizável** por dificuldade (fácil, médio, difícil)
 - **💾 Sistema de cache** inteligente para evitar duplicatas
 - **🔄 Regeneração de questões** rejeitadas com variedade garantida
 - **🔍 Interface web** intuitiva com análise detalhada
-- **� Exportação completa** para JSON com histórico
+- **💾 Exportação completa** para JSON com histórico
 - **📈 Estatísticas em tempo real** de aprovação e desempenho
 
 ## 🧪Tecnologias Utilizadas
