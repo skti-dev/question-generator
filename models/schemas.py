@@ -24,6 +24,7 @@ class Question(BaseModel):
   opcoes: Optional[List[str]] = Field(default=None, description="Opções para múltipla escolha")
   gabarito: str = Field(description="Resposta correta")
   question_type: QuestionType = Field(description="Tipo de questão")
+  materia: Optional[Subject] = Field(default=None, description="Matéria da questão")
   
   def format_question(self) -> str:
     """Formata a questão no padrão solicitado - sempre múltipla escolha"""

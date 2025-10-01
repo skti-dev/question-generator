@@ -150,31 +150,26 @@ class QuestionGeneratorPipeline:
     max_attempts = 8  # Mais tentativas para regeneração
     best_question = None
     best_score = 0.0
-    
-    for attempt in range(max_attempts):
+
+    for _ in range(max_attempts):
       try:
-        # Gerar questão SEM usar cache
         question = self._route_to_subject_chain(request)
-        
-        # Se deve evitar texto específico, verificar diferença
-        if avoid_text and avoid_text.strip():
-          if question.enunciado.strip() == avoid_text.strip():
-            continue  # Pular questões idênticas
-        
-        # Validar questão
-        validation = validate_question(question, request)
-        
-        # Manter a melhor questão encontrada
-        if validation.confidence_score > best_score:
-          best_question = QuestionWithValidation(question=question, validation=validation)
-          best_score = validation.confidence_score
-          
-          # Se encontrou uma boa questão, usar ela
-          if validation.is_aligned and validation.confidence_score >= 0.7:
-            break
-            
-      except Exception as e:
-        continue  # Tentar próxima iteração
+      except Exception:
+        continue
+
+      # Evitar repetir enunciado exato, se fornecido
+      if avoid_text and avoid_text.strip() and question.enunciado.strip() == avoid_text.strip():
+        continue
+
+      # Validar a questão gerada
+      validation = validate_question(question, request)
+
+      # Atualizar melhor candidato encontrado
+      if validation.confidence_score > best_score:
+        best_question = QuestionWithValidation(question=question, validation=validation)
+        best_score = validation.confidence_score
+        if validation.is_aligned and best_score >= 0.7:
+          break
     
     # Retornar a melhor questão encontrada ou criar uma de erro
     if best_question:

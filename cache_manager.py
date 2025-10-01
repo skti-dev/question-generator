@@ -35,46 +35,59 @@ class CacheManager:
     }
     key_string = json.dumps(key_data, sort_keys=True)
     return hashlib.sha256(key_string.encode()).hexdigest()[:16]
+
+  def _parse_row(self, row):
+    try:
+      question_data = json.loads(row[1])
+      validation_data = json.loads(row[2])
+
+      q_kwargs = dict(question_data)
+      try:
+        question = Question(**q_kwargs)
+      except Exception:
+        if 'materia' in q_kwargs:
+          q_kwargs.pop('materia')
+        question = Question(**q_kwargs)
+
+      validation = ValidationResult(**validation_data)
+      return question, validation
+    except Exception:
+      return None, None
+
+  def _matches_request(self, question: Question, request: QuestionRequest) -> bool:
+    if question.codigo != request.codigo:
+      return False
+    if question.question_type.value != request.question_type.value:
+      return False
+    if hasattr(request, 'subject') and request.subject is not None:
+      if question.materia is not None and question.materia.value != request.subject.value:
+        return False
+    return True
   
   def get_cached_questions(self, request: QuestionRequest, limit: int = 10) -> List[CacheEntry]:
-    """Busca questões em cache para a solicitação"""
-    # Busca por questões similares (mesmo código, tipo)
-    base_key_data = {
-      "codigo": request.codigo,
-      "question_type": request.question_type.value,
-      "subject": request.subject.value
-    }
-    
+    """Busca questões em cache para a solicitação (versão simplificada)."""
+    entries: List[CacheEntry] = []
     with sqlite3.connect(self.db_path) as conn:
-      cursor = conn.execute("""
-        SELECT cache_key, question_data, validation_data, created_at 
-        FROM question_cache 
-        WHERE cache_key LIKE ? 
-        ORDER BY created_at DESC 
+      cursor = conn.execute(
+        """
+        SELECT cache_key, question_data, validation_data, created_at
+        FROM question_cache
+        ORDER BY created_at DESC
         LIMIT ?
-      """, (f"{json.dumps(base_key_data, sort_keys=True)[:20]}%", limit))
-      
-      entries = []
-      for row in cursor.fetchall():
-        try:
-          question_data = json.loads(row[1])
-          validation_data = json.loads(row[2])
-          
-          question = Question(**question_data)
-          validation = ValidationResult(**validation_data)
-          
-          entry = CacheEntry(
-            cache_key=row[0],
-            question=question,
-            validation=validation,
-            created_at=row[3]
-          )
-          entries.append(entry)
-        except Exception as e:
-          # Se houver erro ao deserializar, ignora entrada
-          continue
-      
-      return entries
+        """,
+        (max(50, limit * 3),),
+      )
+      rows = cursor.fetchall()
+
+    for row in rows:
+      question, validation = self._parse_row(row)
+      if question is None:
+        continue
+      if not self._matches_request(question, request):
+        continue
+      entries.append(CacheEntry(cache_key=row[0], question=question, validation=validation, created_at=row[3]))
+
+    return entries
   
   def cache_question(self, request: QuestionRequest, question: Question, validation: ValidationResult) -> str:
     """Armazena questão no cache"""
@@ -178,7 +191,7 @@ class CacheManager:
             created_at=row[3]
           )
           entries.append(entry)
-        except Exception as e:
+        except Exception:
           # Se houver erro ao deserializar, ignora entrada
           continue
       
@@ -206,7 +219,7 @@ class CacheManager:
             question_data = json.loads(row[1])
             if question_data.get("enunciado") == question_content:
               keys_to_remove.append(row[0])
-          except:
+          except Exception:
             continue
         removed_count = 0
         for key in keys_to_remove:
