@@ -105,15 +105,15 @@ class QuestionGeneratorPipeline:
         # Gerar questão usando a chain apropriada
         question = self._route_to_subject_chain(request)
         
-        # Verificar se é duplicata apenas se usar cache
-        if use_cache and self.cache_manager.is_duplicate(request, question):
+        # Verificar se é duplicata
+        if self.cache_manager.is_duplicate(request, question):
           continue  # Tentar novamente
         
         # Validar questão
         validation = validate_question(question, request)
         
-        # Salvar no cache apenas se válida e usar cache
-        if use_cache and validation.is_aligned:
+        # Salvar no cache apenas se válida
+        if validation.is_aligned:
           self.cache_manager.cache_question(request, question, validation)
         
         return QuestionWithValidation(
