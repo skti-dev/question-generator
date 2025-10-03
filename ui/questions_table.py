@@ -37,7 +37,14 @@ def _actions_bar(batches):
 def _render_question_block(batch_idx, q_idx, batch, qwv):
     question = qwv.question
     validation = qwv.validation
-    status_icon = "✅" if validation.is_aligned else "❌"
+    # Considera aprovada apenas se alinhada e confiança >= 0.7
+    def _is_approved_local(q):
+        try:
+            return bool(q.validation.is_aligned) and float(q.validation.confidence_score) >= 0.7
+        except Exception:
+            return False
+
+    status_icon = "✅" if _is_approved_local(qwv) else "❌"
     confidence_icon = _confidence_icon(validation.confidence_score)
 
     with st.container():
@@ -153,9 +160,8 @@ def questions_table_panel(batches, handle_question_actions):
         st.markdown(f"### 📖 {batch.request.codigo} - {batch.request.objeto_conhecimento[:60]}...")
         for j, qwv in enumerate(batch.questions):
             _render_question_block(i, j, batch, qwv)
-
     total_questions = sum(len(batch.questions) for batch in batches)
-    total_approved = sum(sum(1 for q in batch.questions if q.validation.is_aligned) for batch in batches)
+    total_approved = sum(sum(1 for q in batch.questions if (bool(q.validation.is_aligned) and float(q.validation.confidence_score) >= 0.7)) for batch in batches)
     total_rejected = total_questions - total_approved
     col1, col2, col3 = st.columns(3)
     with col1:

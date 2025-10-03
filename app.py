@@ -108,6 +108,14 @@ def _alternativas_from_opcoes(opcoes):
   return {}
 
 
+def _is_approved(qwv) -> bool:
+  """Retorna True se a questão for considerada aprovada (alinhada e confiança >= 0.7)."""
+  try:
+    return bool(qwv.validation.is_aligned) and float(qwv.validation.confidence_score) >= 0.7
+  except Exception:
+    return False
+
+
 def _regen_find_old_question_text(regenerate_request):
   """Retorna o enunciado da questão antiga para evitar duplicação, ou None."""
   if 'current_batches' not in st.session_state:
@@ -131,7 +139,7 @@ def _regen_replace_question_in_batches(regenerate_request, new_question):
     if batch.request.codigo == regenerate_request['codigo']:
       if regenerate_request['index'] < len(batch.questions):
         batch.questions[regenerate_request['index']] = new_question
-        batch.total_approved = sum(1 for q in batch.questions if q.validation.is_aligned)
+        batch.total_approved = sum(1 for q in batch.questions if _is_approved(q))
         batch.total_generated = len(batch.questions)
       break
 
@@ -275,7 +283,10 @@ def _render_results_header(batches):
   st.header("📊 Resultados da Geração Atual")
 
   total_generated = sum(batch.total_generated for batch in batches)
-  total_approved = sum(batch.total_approved for batch in batches)
+  total_approved = sum(
+    sum(1 for q in batch.questions if _is_approved(q))
+    for batch in batches
+  )
   approval_rate = (total_approved / total_generated * 100) if total_generated > 0 else 0
 
   col1, col2, col3, col4 = st.columns(4)
@@ -327,7 +338,7 @@ def _render_single_rejected_question(batch, index_in_list, question_with_validat
 def _render_rejected_questions_section(batches):
   """Renderiza a seção de questões rejeitadas com ações de regeneração."""
   rejected_exists = any(
-    any(not q.validation.is_aligned for q in batch.questions)
+    any(not _is_approved(q) for q in batch.questions)
     for batch in batches
   )
   if not rejected_exists:
@@ -337,13 +348,14 @@ def _render_rejected_questions_section(batches):
     st.markdown("**🔄 Estas questões não foram aprovadas e podem ser regeneradas:**")
 
     for batch in batches:
-      rejected_questions = [q for q in batch.questions if not q.validation.is_aligned]
-      if not rejected_questions:
+      # manter índices originais para regeneração correta
+      rejected_pairs = [(idx, q) for idx, q in enumerate(batch.questions) if not _is_approved(q)]
+      if not rejected_pairs:
         continue
 
       st.markdown(f"### 📖 {batch.request.codigo} - {batch.request.objeto_conhecimento[:60]}...")
-      for j, qwv in enumerate(rejected_questions):
-        _render_single_rejected_question(batch, j, qwv)
+      for orig_idx, qwv in rejected_pairs:
+        _render_single_rejected_question(batch, orig_idx, qwv)
 
 
 def _render_approved_analysis_section(batches):
@@ -354,7 +366,7 @@ def _render_approved_analysis_section(batches):
         st.markdown(f"## 📖 {batch.request.codigo} - {batch.request.objeto_conhecimento[:80]}...")
         st.info(f"**Unidade Temática:** {batch.request.unidade_tematica}")
 
-        approved_questions = [q for q in batch.questions if q.validation.is_aligned]
+        approved_questions = [q for q in batch.questions if _is_approved(q)]
         if not approved_questions:
           st.warning("⚠️ Nenhuma questão foi aprovada na validação para este código.")
           st.markdown("---")
