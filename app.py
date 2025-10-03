@@ -173,7 +173,7 @@ def _render_config_section():
   from ui.config_panel import config_panel
   with st.expander("⚙️ Configurações", expanded=True):
     selected_subject, selected_codes, _codes_data = config_panel()
-    questions_per_code = st.number_input("Questões por Código", min_value=1, max_value=3, value=1)
+    questions_per_code = st.number_input("Questões por Código", min_value=1, max_value=20, value=1)
     total_questions = len(selected_codes) * questions_per_code
     if st.button(
       f"🚀 Gerar {total_questions} questões",

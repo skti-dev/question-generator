@@ -85,7 +85,7 @@ class QuestionGeneratorPipeline:
     else:
       raise ValueError(f"Matéria não suportada: {request.subject}")
   
-  def generate_single_question(self, request: QuestionRequest, use_cache: bool = True) -> QuestionWithValidation:
+  def generate_single_question(self, request: QuestionRequest, use_cache: bool = False) -> QuestionWithValidation:
     """Gera uma única questão com validação"""
     
     # Verificar cache primeiro se habilitado
@@ -99,7 +99,7 @@ class QuestionGeneratorPipeline:
         )
     
     # Gerar nova questão
-    max_attempts = 3
+    max_attempts = 20
     for attempt in range(max_attempts):
       try:
         # Gerar questão usando a chain apropriada
@@ -197,8 +197,8 @@ class QuestionGeneratorPipeline:
     self, 
     code: str, 
     question_types: List[QuestionType],
-    quantity: int = 3,
-    use_cache: bool = True
+    quantity: int = 20,
+    use_cache: bool = False
   ) -> QuestionBatch:
     """Gera um lote de questões para um código de habilidade"""
     
@@ -255,8 +255,8 @@ class QuestionGeneratorPipeline:
   def generate_custom_distribution(
     self,
     codes: List[str],
-    questions_per_code: int = 3,
-    use_cache: bool = True
+    questions_per_code: int = 20,
+    use_cache: bool = False
   ) -> List[QuestionBatch]:
     """Gera questões com distribuição customizada - sempre múltipla escolha"""
     
@@ -313,7 +313,7 @@ def get_codes_for_subject(subject: str) -> List[Dict[str, str]]:
 
 def generate_questions(
   codes: List[str],
-  questions_per_code: int = 3
+  questions_per_code: int = 20
 ) -> List[QuestionBatch]:
   """Função principal para gerar questões - sempre múltipla escolha"""
   return pipeline.generate_custom_distribution(
